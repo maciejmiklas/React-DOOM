@@ -1,0 +1,40 @@
+{
+  "name": "React-DOOM",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@testing-library/user-event": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "create-react-class": "latest",
+    "webpack": "latest",
+    "webpack-cli": "latest",
+    "babel-core": "latest",
+    "babel-loader": "latest",
+    "style-loader": "latest",
+    "babel-preset-env": "latest",
+    "babel-preset-react": "latest",
+    "babel-preset-stage-0": "latest",
+    "prop-types": "latest",
+    "uuid": "latest",
+    "node-sass": "latest",
+    "redux": "latest",
+    "react-redux": "latest",
+    "react-icon": "latest",
+    "react-bootstrap": "latest",
+    "bootstrap": "latest",
+    "react-router-dom": "latest",
+    "history": "latest"
+  },
+  "scripts": {
+    "build": "webpack --mode development",
+    "watch": "webpack --watch --mode development --watch-aggregate-timeout 200",
+    "start": "webpack-dev-server --mode development --open"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  }
+}
