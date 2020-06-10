@@ -1,6 +1,3 @@
-//let read = FileReader.readAsArrayBuffer("wad/DOOM.WAD")
-console.log("AAAS")
+let aaa = {}
 
-function log(ina) {
-    console.log(ina)
-}
+console.log([...aaa.bal])

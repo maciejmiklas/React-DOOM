@@ -1,6 +1,8 @@
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
 module.exports = {
     entry: {
-        doom: "./src/doom.js",
+        react_doom: "./src/react_doom.js",
         test: "./src/test.js"
     },
     output: {
@@ -13,31 +15,61 @@ module.exports = {
                 exclude: /(node_modules)/,
                 loader: ['babel-loader']
             },
+
+            // In order to use extracted CSS enable this module and insert following line into index.html->head:
+            // <link rel="stylesheet" type="text/css" href="dist/react_doom.css">
             {
-                test: /\.css$/,
-                use: ['style-loader', 'css-loader', {
-                    loader: 'postcss-loader',
-                    options: {
-                        plugins: () => [require('autoprefixer')]
-                    }
-                }]
-            },
-            {
-                test: /\.s[ac]ss$/i,
+                test: /\.Xscss$/,
                 use: [
-                    // Creates `style` nodes from JS strings
-                    'style-loader',
-                    // Translates CSS into CommonJS
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {
+                            hmr: true,
+                        },
+                    },
                     'css-loader',
-                    // Compiles Sass to CSS
                     'sass-loader',
                 ],
+            },
+
+            // In order to use inline CSS enable this module and remove  <link rel="stylesheet" ... /> from index.html
+            {
+                test: /\.scss$/,
+                use: [
+                    'style-loader', // creates style nodes from JS strings
+                    'css-loader', // translates CSS into CommonJS
+                    'sass-loader', // compiles Sass to CSS, using Node Sass by default
+                ],
+            },
+            {
+                test: /\.(png|jpe?g|gif)$/i,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            outputPath: 'dist/'
+                        }
+                    },
+                ],
+            },
+            {
+                test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name].[ext]',
+                            outputPath: 'dist/fonts/'
+                        }
+                    }
+                ]
             }
         ]
-    }
+    },
+    plugins: [
+        new MiniCssExtractPlugin({
+            filename: '[name].css',
+            chunkFilename: '[id].css',
+        }),
+    ],
 };
-
-const webpack = require('webpack');
-new webpack.DefinePlugin({
-    BASENAME: '/doom/'
-})

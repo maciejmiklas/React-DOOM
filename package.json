@@ -15,6 +15,7 @@
     "babel-core": "latest",
     "babel-loader": "latest",
     "style-loader": "latest",
+    "extract-loader": "latest",
     "babel-preset-env": "latest",
     "babel-preset-react": "latest",
     "babel-preset-stage-0": "latest",
@@ -26,8 +27,12 @@
     "react-icon": "latest",
     "react-bootstrap": "latest",
     "bootstrap": "latest",
+    "react-router": "latest",
     "react-router-dom": "latest",
-    "history": "latest"
+    "history": "latest",
+    "extract-text-webpack-plugin": "latest",
+    "mini-css-extract-plugin": "latest",
+    "compass-mixins": "latest"
   },
   "scripts": {
     "build": "webpack --mode development",
