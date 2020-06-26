@@ -32,7 +32,10 @@
     "history": "latest",
     "extract-text-webpack-plugin": "latest",
     "mini-css-extract-plugin": "latest",
-    "compass-mixins": "latest"
+    "compass-mixins": "latest",
+    "react-dropzone": "latest",
+    "html-webpack-plugin": "latest",
+    "clean-webpack-plugin": "latest"
   },
   "scripts": {
     "build": "webpack --mode development",

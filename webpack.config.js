@@ -1,4 +1,7 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+const path = require('path');
 
 module.exports = {
     entry: {
@@ -6,8 +9,11 @@ module.exports = {
         test: "./src/test.js"
     },
     output: {
+        path: path.resolve(__dirname, 'dist'),
         filename: '[name].js',
+        publicPath: '/React-DOOM/dist'
     },
+    devtool: 'inline-source-map',
     module: {
         rules: [
             {
@@ -16,8 +22,11 @@ module.exports = {
                 loader: ['babel-loader']
             },
 
-            // In order to use extracted CSS enable this module and insert following line into index.html->head:
-            // <link rel="stylesheet" type="text/css" href="dist/react_doom.css">
+            // In order to use extracted CSS:
+            // 1) enable this module (Xscss -> scss)
+            // 2) insert following line into index.html->head:
+            //    <link rel="stylesheet" type="text/css" href="dist/react_doom.css">
+            // 3) disable other scss-module
             {
                 test: /\.Xscss$/,
                 use: [
@@ -47,7 +56,7 @@ module.exports = {
                     {
                         loader: 'file-loader',
                         options: {
-                            outputPath: 'dist/'
+                            outputPath: '/img'
                         }
                     },
                 ],
@@ -58,8 +67,7 @@ module.exports = {
                     {
                         loader: 'file-loader',
                         options: {
-                            name: '[name].[ext]',
-                            outputPath: 'dist/fonts/'
+                            outputPath: '/font'
                         }
                     }
                 ]
@@ -67,6 +75,11 @@ module.exports = {
         ]
     },
     plugins: [
+        new CleanWebpackPlugin(),
+        new HtmlWebpackPlugin({
+            title: 'Development',
+        }),
+
         new MiniCssExtractPlugin({
             filename: '[name].css',
             chunkFilename: '[id].css',

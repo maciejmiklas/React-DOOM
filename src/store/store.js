@@ -1,12 +1,9 @@
 import {combineReducers, createStore} from "redux";
 import {initial} from "./initial";
-import {router} from "../router/reducer";
+import {reducer as router} from "../pages/Router";
+import {reducer as wads} from "../pages/ManageWads";
 
-const reducer1 = (state = [], action) => {
-    return state;
-}
-
-let reducers = combineReducers({reducer1, router});
+let reducers = combineReducers({router, wads});
 const store = createStore(reducers, initial)
 store.subscribe(() => console.log(">Store State> " + JSON.stringify(store.getState())))
 export default store;

@@ -1,6 +1,6 @@
 export const initial = {
     router: {
-        active: "MENU"
+        active: "MANAGE_WADS"
     },
-    reducer1: "JO!"
+    wads: "JO!"
 };

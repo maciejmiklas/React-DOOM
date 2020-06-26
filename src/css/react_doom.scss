@@ -1,17 +1,4 @@
-$btn-padding-x: 33px;
-
-$primary: rgba(102, 0, 0, 0.4);
-//$secondary:     $gray-600 !default;
-//$success:       $green !default;
-//$info:          $cyan !default;
-//$warning:       $yellow !default;
-//$danger:        $red !default;
-//$light:         $gray-100 !default;
-//$dark:          $gray-800 !default;
-
-$menu-button-border: rgba(252, 0, 0, 0.8);
-$menu-button-color: rgb(252, 0, 0);
-
+@import "variables";
 @import "~bootstrap/scss/bootstrap";
 @import "crt";
 
@@ -28,22 +15,43 @@ $menu-button-color: rgb(252, 0, 0);
     @extend .btn;
     @include button-variant($color, $menu-button-border);
     font-size: xx-large;
-    color: $menu-button-color;
+    color: $font-color;
 
     @include hover() {
-      color: $menu-button-color;
+      color: $font-color;
       @include gradient-bg(darken($color, 100%));
     }
   }
 }
 
-.mainMenu {
-  background: url("img/doom_logo.png") no-repeat center center;
-  background-size: cover;
+.menuButton {
+  @extend .btn-nav-primary
+}
+
+.navbarButton {
+  @extend .mr-sm-2
+}
+
+.navigationTitle {
+  @extend .mr-auto
+}
+
+.navigation {
+  @extend .crt;
   font-family: bloody;
-  background-color: #000000;
+  background-color: black;
+}
+
+.navigationContent {
+  padding: 10px;
+  font-family: bloody;
+  background: url("img/doom_logo.png") no-repeat center;
+  background-size: contain;
+  min-height: 600px;
 }
 
 .mainContainer {
-  background-color: #393939;
+  background-color: $background-color;
+  color: $font-color;
+  text-align: center;
 }

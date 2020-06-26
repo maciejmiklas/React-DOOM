@@ -1,10 +1,7 @@
 // CSS CRT screen effect by Lucas Bebber (https://codepen.io/lbebber)
 
 @import '~compass-mixins/lib/compass/css3';
-
-$screen-background: #111;
-$flicker-steps: 50;
-$flicker-delay: 0.5s;
+@import "variables";
 
 @keyframes flicker {
   @for $i from 0 through $flicker-steps {
@@ -42,7 +39,7 @@ $flicker-delay: 0.5s;
     left: 0;
     bottom: 0;
     right: 0;
-    background: linear-gradient(transparentize($screen-background, 1) 50%, transparentize(darken($screen-background, 10), 0.75) 50%), linear-gradient(90deg, transparentize(#ff0000, 0.94), transparentize(#00ff00, 0.98), transparentize(#0000ff, 0.94));
+    background: linear-gradient(transparentize($screen-background, 1) 50%, transparentize(darken($screen-background, 10), 0.75) 50%), linear-gradient(90deg, transparentize($font-color, 0.94), transparentize(#00ff00, 0.98), transparentize(#0000ff, 0.94));
     z-index: 2;
     background-size: 100% 2px, 3px 100%;
     pointer-events: none;

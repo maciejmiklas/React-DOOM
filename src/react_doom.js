@@ -1,7 +1,7 @@
 import React from "react";
 import './css/react_doom.scss'
 import {render} from "react-dom";
-import Router from "./router/router";
+import {Router} from "./pages/Router";
 import {Provider} from "react-redux";
 import store from "./store/store";
 
