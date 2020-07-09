@@ -2,9 +2,9 @@ import React from "react";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
 import PropTypes from 'prop-types';
-import Navigation from "./Navigation";
+import Navigation from "./navigation";
 import {connect} from "react-redux";
-import {actionGotoPage, PAGES} from "./Router";
+import {actionGotoPage, PAGES} from "./router";
 
 const continuePlayingVisible = () => true
 const continuePlayingAction = (dispatch) => dispatch(actionGotoPage(PAGES.PLAY_PAGE))
@@ -81,7 +81,7 @@ const menuElements = {
     }
 }
 
-function Menu({dispatch}) {
+function menu({dispatch}) {
     return (
         <Navigation>
             <Row className="justify-content-md-center">
@@ -107,4 +107,4 @@ MenuButton.propTypes = {
     msg: PropTypes.string
 }
 
-export default connect()(Menu);
+export default connect()(menu);

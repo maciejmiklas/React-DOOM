@@ -37,14 +37,16 @@
 }
 
 .navigation {
-  @extend .crt;
+  // @extend .crt;
+  background-color: $screen-background-color;
+}
+
+* {
   font-family: bloody;
-  background-color: black;
 }
 
 .navigationContent {
   padding: 10px;
-  font-family: bloody;
   background: url("img/doom_logo.png") no-repeat center;
   background-size: contain;
   min-height: 600px;

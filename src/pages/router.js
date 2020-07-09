@@ -1,22 +1,17 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import PlayPage from "./PlayPage";
-import Menu from "./Menu";
-import {ManageWads} from "./ManageWads";
+import playPage from "./playPage";
+import menu from "./menu";
+import {manageWads} from "./manageWads";
 import PropTypes from "prop-types";
 
 const components = {
     PLAY_PAGE: connect(null, dispatch => ({
-        onExit: () => dispatch(actionGotoPage(P.PLAY_PAGE))
-    }))(PlayPage),
+        onExit: () => dispatch(actionGotoPage(PAGES.PLAY_PAGE))
+    }))(playPage),
 
-    MANAGE_WADS: connect(null, dispatch => ({
-        onExit: () => dispatch(actionGotoPage(P.MANAGE_WADS))
-    }))(ManageWads),
-
-    MENU: connect(null, dispatch => ({
-        onExit: () => dispatch(actionGotoPage(P.MENU))
-    }))(Menu),
+    MANAGE_WADS: manageWads,
+    MENU: menu,
 }
 
 class RouterComponent extends Component {
@@ -44,7 +39,6 @@ export const ACTIONS = {
 }
 
 export const reducer = (state = [], action) => {
-
     switch (action.type) {
         case ACTIONS.GOTO_PAGE:
             return {

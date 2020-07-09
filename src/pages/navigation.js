@@ -4,8 +4,9 @@ import {Nav} from "react-bootstrap";
 import Navbar from "react-bootstrap/Navbar";
 import Button from "react-bootstrap/Button";
 import {connect} from "react-redux";
-import {actionGotoPage, PAGES} from "./Router";
+import {actionGotoPage, PAGES} from "./router";
 import PropTypes from 'prop-types';
+import {Confirm} from "./confirm";
 
 class Navigation extends Component {
 
@@ -38,6 +39,7 @@ class Navigation extends Component {
                         </Nav>
                     </Navbar>
                 </div>
+                <Confirm/>
             </Container>
         )
     }
@@ -60,4 +62,4 @@ const NavButton = ({dispatch, children, action}) =>
     </>
 
 
-export default connect()(Navigation)
+export default connect(state => ({alertDialog: {...state.alertDialog}}))(Navigation)

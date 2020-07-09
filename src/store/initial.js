@@ -2,5 +2,12 @@ export const initial = {
     router: {
         active: "MANAGE_WADS"
     },
-    wads: "JO!"
+    wads: [],
+    confirm: {
+        visible: false,
+        callbackAction: "-",
+        callbackProps: {},
+        headerText: "-",
+        msgText: "-",
+    }
 };
