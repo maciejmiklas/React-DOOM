@@ -4,6 +4,8 @@ import playPage from "./playPage";
 import menu from "./menu";
 import {manageWads} from "./manageWads";
 import PropTypes from "prop-types";
+import {uploadWads} from "./uploadWads";
+import ACTIONS from "../store/actions";
 
 const components = {
     PLAY_PAGE: connect(null, dispatch => ({
@@ -11,6 +13,7 @@ const components = {
     }))(playPage),
 
     MANAGE_WADS: manageWads,
+    UPLOAD_WADS: uploadWads,
     MENU: menu,
 }
 
@@ -26,7 +29,7 @@ class RouterComponent extends Component {
 }
 
 export const actionGotoPage = (page) => ({
-    type: ACTIONS.GOTO_PAGE,
+    type: ACTIONS.ROUTER_GOTO_PAGE,
     page
 })
 
@@ -34,13 +37,9 @@ actionGotoPage.propTypes = {
     page: PropTypes.string,
 }
 
-export const ACTIONS = {
-    GOTO_PAGE: "GOTO_PAGE",
-}
-
 export const reducer = (state = [], action) => {
     switch (action.type) {
-        case ACTIONS.GOTO_PAGE:
+        case ACTIONS.ROUTER_GOTO_PAGE:
             return {
                 ...state,
                 active: action.page
@@ -52,6 +51,7 @@ export const reducer = (state = [], action) => {
 export const PAGES = {
     PLAY_PAGE: "PLAY_PAGE",
     MANAGE_WADS: "MANAGE_WADS",
+    UPLOAD_WADS: "UPLOAD_WADS",
     MENU: "MENU"
 };
 

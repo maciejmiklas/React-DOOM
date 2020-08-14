@@ -5,90 +5,83 @@ import PropTypes from 'prop-types';
 import Navigation from "./navigation";
 import {connect} from "react-redux";
 import {actionGotoPage, PAGES} from "./router";
+import ACTIONS from "../store/actions";
 
-const continuePlayingVisible = () => true
-const continuePlayingAction = (dispatch) => dispatch(actionGotoPage(PAGES.PLAY_PAGE))
+const EL_CONTINUE_PLAYING = "CONTINUE_PLAYING";
+const EL_LOAD_FREE_WAD = "LOAD_FREE_WAD";
+const EL_LOAD_GAME = "LOAD_GAME";
+const EL_SAVE_GAME = "SAVE_GAME";
+const EL_QUICK_SAVE = "QUICK_SAVE";
+const EL_MANAGE_WADS = "MANAGE_WADS";
+const EL_UPLOAD_WADS = "UPLOAD_WADS";
+const EL_CONTROLS = "CONTROLS";
+const EL_GRAPHICS = "GRAPHICS";
+const EL_SOUND = "SOUND";
 
-const manageWadsVisible = () => true
-const manageWadsAction = (dispatch) => dispatch(actionGotoPage(PAGES.MANAGE_WADS))
+const menuElements = new Map();
 
-const loadGameVisible = () => true
-const loadGameAction = (dispatch) => console.log("Load Game")
+menuElements.set(EL_CONTINUE_PLAYING, {
+    action: (dispatch) => dispatch(actionGotoPage(PAGES.PLAY_PAGE)),
+    title: "CONTINUE PLAYING"
+});
 
-const saveGameVisible = () => true
-const saveGameAction = (dispatch) => console.log("Save Game")
+menuElements.set(EL_LOAD_FREE_WAD, {
+    action: (dispatch) => console.log("LOAD FREE WAD"),
+    title: "LOAD FREE WAD"
+});
 
-const quickSaveVisible = () => true
-const quickSaveAction = (dispatch) => console.log("Quick Save")
+menuElements.set(EL_LOAD_GAME, {
+    action: (dispatch) => console.log("LOAD GAME"),
+    title: "LOAD GAME"
+});
 
-const controlsVisible = () => true
-const controlsAction = (dispatch) => console.log("Controls")
+menuElements.set(EL_SAVE_GAME, {
+    action: (dispatch) => console.log("SAVE GAME"),
+    title: "SAVE GAME"
+});
 
-const graphicsVisible = () => true
-const graphicsAction = (dispatch) => console.log("Graphics")
+menuElements.set(EL_QUICK_SAVE, {
+    action: (dispatch) => console.log("QUICK SAVE"),
+    title: "QUICK SAVE"
+});
 
-const soundVisible = () => true
-const soundAction = (dispatch) => console.log("Sound")
+menuElements.set(EL_MANAGE_WADS, {
+    action: (dispatch) => dispatch(actionGotoPage(PAGES.MANAGE_WADS)),
+    title: "MANAGE WADS"
+});
 
-const loadFreeWadVisible = () => true
-const loadFreeWadAction = (dispatch) => console.log("Load Free Wad")
+menuElements.set(EL_UPLOAD_WADS, {
+    action: (dispatch) => dispatch(actionGotoPage(PAGES.UPLOAD_WADS)),
+    title: "UPLOAD WADS"
+});
 
-const menuElements = {
-    continue_playing: {
-        visible: continuePlayingVisible,
-        action: continuePlayingAction,
-        title: "CONTINUE PLAYING"
-    },
-    load_free_wad: {
-        visible: loadFreeWadVisible,
-        action: loadFreeWadAction,
-        title: "LOAD FREE WAD"
-    },
-    load_game: {
-        visible: loadGameVisible,
-        action: loadGameAction,
-        title: "LOAD GAME"
-    },
-    save_game: {
-        visible: saveGameVisible,
-        action: saveGameAction,
-        title: "SAVE GAME"
-    },
-    quick_save: {
-        visible: quickSaveVisible,
-        action: quickSaveAction,
-        title: "QUICK SAVE"
-    },
-    manage_wads: {
-        visible: manageWadsVisible,
-        action: manageWadsAction,
-        title: "MANAGE WADS"
-    },
-    controls: {
-        visible: controlsVisible,
-        action: controlsAction,
-        title: "CONTROLS SETUP"
-    },
-    graphics: {
-        visible: graphicsVisible,
-        action: graphicsAction,
-        title: "GRAPHICS SETUP"
-    },
-    sound: {
-        visible: soundVisible,
-        action: soundAction,
-        title: "SOUND SETUP"
-    }
+menuElements.set(EL_CONTROLS, {
+    action: (dispatch) => console.log("CONTROLS"),
+    title: "CONTROLS"
+});
+
+menuElements.set(EL_GRAPHICS, {
+    action: (dispatch) => console.log("GRAPHICS"),
+    title: "GRAPHICS"
+});
+
+menuElements.set(EL_SOUND, {
+    action: (dispatch) => console.log("SOUND"),
+    title: "SOUND"
+});
+
+function visible(menu, name) {
+    return menu.visible.includes(name);
 }
 
-function menu({dispatch}) {
+function menu({dispatch, menu}) {
     return (
         <Navigation>
-            <Row className="justify-content-md-center">
+            <Row className="menu">
                 <div className="btn-group-vertical">
-                    {Object.keys(menuElements).map((me, i) =>
-                        <MenuButton action={() => menuElements[me].action(dispatch)}
-                                    key={me}>{menuElements[me].title}</MenuButton>
+                    {[...menuElements.keys()].map(key =>
+                        <MenuButton visible={visible(menu, key)} action={() => menuElements.get(key).action(dispatch)}
+                                    key={key}>{menuElements.get(key).title}</MenuButton>
                     )}
                 </div>
             </Row>
@@ -96,15 +89,38 @@ function menu({dispatch}) {
     )
 }
 
+const addElement = (state, element) => {
+    let newState = state;
+    if (!state.visible.includes(element)) {
+        newState = {
+            ...state,
+            visible: [...state.visible, element]
+        }
+    }
+    return newState;
+}
 
-const MenuButton = (props) =>
-    <>
-        <Button onClick={props.action} className="btn-nav-primary">{props.children}</Button>
-    </>
+export const reducer = (state = [], action) => {
+    let newState = state;
+    switch (action.type) {
+        case ACTIONS.WADS_UPLOADED:
+            newState = addElement(state, EL_MANAGE_WADS);
+    }
+    return newState;
+}
+
+const MenuButton = (props) => {
+    if (props.visible) {
+        return <Button onClick={props.action} className="btn-nav-primary">{props.children}</Button>
+    } else {
+        return <></>
+    }
+}
 
 MenuButton.propTypes = {
     to: PropTypes.string,
-    msg: PropTypes.string
+    msg: PropTypes.string,
+    visible: PropTypes.bool
 }
 
-export default connect()(menu);
+export default connect(state => ({menu: {...state.menu}}))(menu);

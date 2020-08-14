@@ -5,7 +5,7 @@ $screen-background-color: black;
 $background-color: rgba(0, 0, 0, 0.91);
 
 $dark: rgb(40, 44, 52);
-$dialog-color:$dark;
+$dialog-color: $dark;
 
 $primary: rgba(102, 0, 0, 0.4);
 
@@ -16,7 +16,9 @@ $modal-content-bg: $dialog-color;
 $modal-content-color: $font-color;
 $modal-content-border-color: $font-color;
 $modal-header-border-color: $font-color;
-$close-color:$font-color;
+$close-color: $font-color;
+
+$navbar-font-color: #6c757d;
 
 $flicker-steps: 50;
 $flicker-delay: 0.5s;

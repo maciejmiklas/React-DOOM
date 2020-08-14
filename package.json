@@ -35,7 +35,9 @@
     "compass-mixins": "latest",
     "react-dropzone": "latest",
     "html-webpack-plugin": "latest",
-    "clean-webpack-plugin": "latest"
+    "clean-webpack-plugin": "latest",
+    "reduce-reducers": "latest",
+    "react-bootstrap-icons": "latest"
   },
   "scripts": {
     "build": "webpack --mode development",

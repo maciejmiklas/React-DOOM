@@ -1,8 +1,11 @@
 import {applyMiddleware, combineReducers, createStore} from 'redux'
 import {initial} from "./initial";
 import {reducer as router} from "../pages/router";
-import {reducer as wads} from "../pages/manageWads";
+import {reducer as uploadWads} from "../pages/uploadWads";
+import {reducer as manageWads} from "../pages/manageWads";
 import {reducer as confirm} from "../pages/confirm"
+import {reducer as menu} from "../pages/menu"
+import reduceReducers from "reduce-reducers";
 
 const storeName = 'react-doom';
 
@@ -23,7 +26,8 @@ const logger = store => next => action => {
     return result
 };
 
-const reducers = combineReducers({router, wads, confirm});
+const wads = reduceReducers(initial, uploadWads, manageWads);
+const reducers = combineReducers({router, wads, confirm, menu});
 const preloadedState = (localStorage[storeName]) ? JSON.parse(localStorage[storeName]) : initial;
 const store = applyMiddleware(logger, saver)(createStore)(reducers, preloadedState);
 

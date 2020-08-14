@@ -3,14 +3,10 @@ import Modal from "react-bootstrap/Modal";
 import PropTypes from 'prop-types';
 import React from "react";
 import {connect} from "react-redux";
-
-const ACTIONS = {
-    SHOW_CONFIRM: "SHOW_CONFIRM",
-    HIDE_CONFIRM: "HIDE_CONFIRM"
-}
+import ACTIONS from "../store/actions";
 
 export const actionShowConfirm = (callbackAction, callbackProps, headerText, msgText) => ({
-    type: ACTIONS.SHOW_CONFIRM,
+    type: ACTIONS.CONFIRM_SHOW,
     callbackAction, callbackProps, headerText, msgText
 })
 
@@ -22,7 +18,7 @@ actionShowConfirm.propTypes = {
 };
 
 export const actionHideConfirm = () => ({
-    type: ACTIONS.HIDE_CONFIRM
+    type: ACTIONS.CONFIRM_HIDE
 })
 
 const actionYes = (state) => ({
@@ -32,7 +28,7 @@ const actionYes = (state) => ({
 
 export const reducer = (state = [], action) => {
     switch (action.type) {
-        case ACTIONS.SHOW_CONFIRM:
+        case ACTIONS.CONFIRM_SHOW:
             return {
                 visible: true,
                 callbackAction: action.callbackAction,
@@ -41,7 +37,7 @@ export const reducer = (state = [], action) => {
                 msgText: action.msgText
             }
 
-        case ACTIONS.HIDE_CONFIRM:
+        case ACTIONS.CONFIRM_HIDE:
             return {
                 visible: false,
                 callbackAction: "-",

@@ -1,12 +1,14 @@
 import React, {Component} from "react";
 import Container from "react-bootstrap/Container";
-import {Nav} from "react-bootstrap";
 import Navbar from "react-bootstrap/Navbar";
 import Button from "react-bootstrap/Button";
 import {connect} from "react-redux";
 import {actionGotoPage, PAGES} from "./router";
 import PropTypes from 'prop-types';
 import {Confirm} from "./confirm";
+import {ArrowReturnLeft, JustifyLeft, Info} from 'react-bootstrap-icons';
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
 
 class Navigation extends Component {
 
@@ -20,10 +22,17 @@ class Navigation extends Component {
         return (
             <Container>
                 <div className="navigation">
-                    <Navbar bg="dark" variant="dark">
+                    <Navbar bg="dark">
                         <NavButton dispatch={this.dispatch}
-                                   action={(dispatch) => dispatch(actionGotoPage(PAGES.MENU))}>Menu</NavButton>
-                        <Navbar.Brand className="mx-auto"> {this.title}</Navbar.Brand>
+                                   action={(dispatch) => dispatch(actionGotoPage(PAGES.MENU))} tooltipOn="bottom"
+                                   tooltipText="Go to main menu">Menu</NavButton>
+                        <Container>
+                            <div className="navbarTitle"> {this.title}</div>
+                        </Container>
+
+                        <NavButton dispatch={this.dispatch}
+                                   action={(dispatch) => dispatch(actionGotoPage(PAGES.MENU))} tooltipOn="bottom"
+                                   tooltipText="Go back"><ArrowReturnLeft/></NavButton>
                     </Navbar>
 
                     <div className="navigationContent">
@@ -31,12 +40,12 @@ class Navigation extends Component {
                     </div>
 
                     <Navbar bg="dark" variant="dark" sticky="bottom">
-                        <Navbar.Brand href="#home">Navbar</Navbar.Brand>
-                        <Nav className="navigationTitle">
-                            <Nav.Link href="#home">Home</Nav.Link>
-                            <Nav.Link href="#features">Features</Nav.Link>
-                            <Nav.Link href="#pricing">Pricing</Nav.Link>
-                        </Nav>
+                        <NavButton dispatch={this.dispatch} action={() => console.log("about")} tooltipOn="top"
+                                   tooltipText="About"><Info/></NavButton>
+                        <Container/>
+                        <NavButton dispatch={this.dispatch}
+                                   action={(dispatch) => dispatch(actionGotoPage(PAGES.MENU))} tooltipOn="top"
+                                   tooltipText="Messages"><JustifyLeft/></NavButton>
                     </Navbar>
                 </div>
                 <Confirm/>
@@ -55,11 +64,19 @@ Navigation.defaultProps = {
     title: ""
 };
 
-const NavButton = ({dispatch, children, action}) =>
-    <>
-        <Button onClick={() => action(dispatch)} variant="outline-info"
-                className="navbarButton">{children}</Button>
-    </>
+const NavButton = ({dispatch, children, action, className = "", tooltipOn = "top", tooltipText = ""}) =>
+    <OverlayTrigger
+        placement={tooltipOn}
+        overlay={
+            <Tooltip id={`tooltip-${tooltipOn}`}>
+                {tooltipText}
+            </Tooltip>
+        }
+    >
+        <Button onClick={() => action(dispatch)} variant="outline-secondary"
+                className={`${className} navbarButton`}>{children}
+        </Button>
+    </OverlayTrigger>
 
 
 export default connect(state => ({alertDialog: {...state.alertDialog}}))(Navigation)
