@@ -3,7 +3,10 @@ import {initial} from "./initial";
 import {reducer as router} from "../pages/router";
 import {reducer as uploadWads} from "../pages/uploadWads";
 import {reducer as manageWads} from "../pages/manageWads";
+import {reducer as editWad} from "../pages/editWad";
+import {reducer as messages} from "../pages/messages";
 import {reducer as confirm} from "../pages/confirm"
+import {reducer as navigation} from "../pages/navigation"
 import {reducer as menu} from "../pages/menu"
 import reduceReducers from "reduce-reducers";
 
@@ -26,8 +29,8 @@ const logger = store => next => action => {
     return result
 };
 
-const wads = reduceReducers(initial, uploadWads, manageWads);
-const reducers = combineReducers({router, wads, confirm, menu});
+const wads = reduceReducers(initial, uploadWads, manageWads, editWad);
+const reducers = combineReducers({router, wads, confirm, menu, navigation, messages});
 const preloadedState = (localStorage[storeName]) ? JSON.parse(localStorage[storeName]) : initial;
 const store = applyMiddleware(logger, saver)(createStore)(reducers, preloadedState);
 

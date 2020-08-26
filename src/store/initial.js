@@ -1,14 +1,24 @@
 export const initial = {
     router: {
-        active: "MANAGE_WADS"
+        active: {
+            name: "WAD_MANAGE",
+            props: {}
+        },
+
+        previous: {
+            name: "MENU",
+            props: {},
+        }
     },
     menu: {
         visible: ["CONTROLS", "GRAPHICS", "SOUND", "UPLOAD_WADS", "MANAGE_WADS"]
     },
+    messages: [
+    ],
     wads: {
         files: [
             {
-                name: "Doom1.wad",
+                name: "Doom1",
                 content: "ADF-aDFADFGSFDGSDFG-XD",
                 uploadTime: "2020-02-03 12:55",
                 lastPlayed: "2020-02-02 14:55",
@@ -22,11 +32,12 @@ export const initial = {
                 ],
                 stats: {
                     totalPlayTimeMs: 0,
-                    longestSessionMs: 0
+                    longestSessionMs: 0,
+                    lastSessionMs:0
                 }
             },
             {
-                name: "Doom2.wad",
+                name: "Doom2",
                 content: "ADF-aDFADFGSFDGSDFG-XD",
                 uploadTime: "2020-02-03 12:55",
                 lastPlayed: "2020-02-02 14:55",
@@ -40,11 +51,12 @@ export const initial = {
                 ],
                 stats: {
                     totalPlayTimeMs: 0,
-                    longestSessionMs: 0
+                    longestSessionMs: 0,
+                    lastSessionMs:0
                 }
             },
             {
-                name: "Doom3.wad",
+                name: "Doom3",
                 content: "ADF-aDFADFGSFDGSDFG-XD",
                 uploadTime: "2020-02-03 12:55",
                 lastPlayed: "2020-02-02 14:55",
@@ -58,18 +70,18 @@ export const initial = {
                 ],
                 stats: {
                     totalPlayTimeMs: 0,
-                    longestSessionMs: 0
+                    longestSessionMs: 0,
+                    lastSessionMs:0
                 }
             }
-        ],
-        edit: {
-            name: null
-        }
+        ]
+    },
+    navigation: {
+        title: ""
     },
     confirm: {
         visible: false,
-        callbackAction: "-",
-        callbackProps: {},
+        callbacks:[],
         headerText: "-",
         msgText: "-",
     }

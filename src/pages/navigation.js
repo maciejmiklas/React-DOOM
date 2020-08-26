@@ -3,49 +3,64 @@ import Container from "react-bootstrap/Container";
 import Navbar from "react-bootstrap/Navbar";
 import Button from "react-bootstrap/Button";
 import {connect} from "react-redux";
-import {actionGotoPage, PAGES} from "./router";
-import PropTypes from 'prop-types';
+import {actionGotoPage, actionGotoPrevious, PAGES} from "./router";
 import {Confirm} from "./confirm";
-import {ArrowReturnLeft, JustifyLeft, Info} from 'react-bootstrap-icons';
+import {ArrowReturnLeft, Info, JustifyLeft} from 'react-bootstrap-icons';
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
+import ACTIONS from "../store/actions";
+import Popover from "react-bootstrap/Popover";
 
-class Navigation extends Component {
+const aboutPopover = (
+    <Popover>
+        <Popover.Title as="h3">DOOM by Maciej Miklas </Popover.Title>
+        <Popover.Content>
+            Implemented in React/Redux on Apache 2.0 Open Source License
+        </Popover.Content>
+    </Popover>
+);
+
+class NavigationTag extends Component {
 
     constructor(props) {
         super(props);
-        this.dispatch = props.dispatch
-        this.title = props.title
+        this.props.dispatch(actionSetTitle(""))
     }
 
     render() {
+        const {dispatch, nav, children} = this.props;
         return (
             <Container>
                 <div className="navigation">
                     <Navbar bg="dark">
-                        <NavButton dispatch={this.dispatch}
+                        <NavButton dispatch={dispatch}
                                    action={(dispatch) => dispatch(actionGotoPage(PAGES.MENU))} tooltipOn="bottom"
-                                   tooltipText="Go to main menu">Menu</NavButton>
+                                   tooltipText="Go to main Menu">Menu</NavButton>
                         <Container>
-                            <div className="navbarTitle"> {this.title}</div>
+                            <div className="navbar-title"> {nav.title}</div>
                         </Container>
 
-                        <NavButton dispatch={this.dispatch}
-                                   action={(dispatch) => dispatch(actionGotoPage(PAGES.MENU))} tooltipOn="bottom"
-                                   tooltipText="Go back"><ArrowReturnLeft/></NavButton>
+                        <NavIcon dispatch={dispatch}
+                                 action={(dispatch) => dispatch(actionGotoPrevious())} tooltipOn="bottom"
+                                 tooltipText="Go back"><ArrowReturnLeft/></NavIcon>
                     </Navbar>
 
-                    <div className="navigationContent">
-                        {this.props.children}
+                    <div className="navigation-content">
+                        {children}
                     </div>
 
                     <Navbar bg="dark" variant="dark" sticky="bottom">
-                        <NavButton dispatch={this.dispatch} action={() => console.log("about")} tooltipOn="top"
-                                   tooltipText="About"><Info/></NavButton>
+
+                        <NavIcon dispatch={dispatch} tooltipOn="right" tooltipText="About">
+                            <OverlayTrigger trigger="click" placement="top" overlay={aboutPopover}>
+                                <Info/>
+                            </OverlayTrigger>
+                        </NavIcon>
                         <Container/>
-                        <NavButton dispatch={this.dispatch}
-                                   action={(dispatch) => dispatch(actionGotoPage(PAGES.MENU))} tooltipOn="top"
-                                   tooltipText="Messages"><JustifyLeft/></NavButton>
+
+                        <NavIcon dispatch={dispatch}
+                                 action={(dispatch) => dispatch(actionGotoPage(PAGES.MESSAGES))} tooltipOn="top"
+                                 tooltipText="Messages"><JustifyLeft/></NavIcon>
                     </Navbar>
                 </div>
                 <Confirm/>
@@ -54,15 +69,26 @@ class Navigation extends Component {
     }
 }
 
-Navigation.propTypes = {
-    dispatch: PropTypes.func,
-    title: PropTypes.string
-};
+export const actionSetTitle = (title) => ({
+    type: ACTIONS.NAVIGATION_SET_TITLE,
+    title
+})
 
-Navigation.defaultProps = {
-    dispatch: f => f,
-    title: ""
-};
+export const reducer = (state = [], action) => {
+    let newState = state;
+    switch (action.type) {
+        case ACTIONS.NAVIGATION_SET_TITLE:
+            newState = {
+                ...state,
+                title: action.title
+            }
+    }
+    return newState;
+}
+
+const NavIcon = ({dispatch, children, action, tooltipOn = "top", tooltipText = ""}) =>
+    <NavButton dispatch={dispatch} children={children} action={action}
+               tooltipOn={tooltipOn} tooltipText={tooltipText}/>
 
 const NavButton = ({dispatch, children, action, className = "", tooltipOn = "top", tooltipText = ""}) =>
     <OverlayTrigger
@@ -79,4 +105,4 @@ const NavButton = ({dispatch, children, action, className = "", tooltipOn = "top
     </OverlayTrigger>
 
 
-export default connect(state => ({alertDialog: {...state.alertDialog}}))(Navigation)
+export const Navigation = connect(state => ({nav: {...state.navigation}}))(NavigationTag)

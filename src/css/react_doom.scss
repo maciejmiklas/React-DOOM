@@ -25,20 +25,28 @@
   }
 }
 
+.wads-list{
+  display:inline-block !important;;
+}
+
 .menu {
   @extend .justify-content-md-center;
   font-family: bloody;
 }
 
-.menuButton {
+.menu-button {
   @extend .btn-nav-primary
 }
 
-.navbarButton {
-  @extend .mr-sm-2
+.navbar-button {
+  @extend .mr-sm-2;
 }
 
-.navbarTitle {
+.msg-text {
+  width: 80%;
+  text-align:left;
+}
+.navbar-title {
   @extend .navbar-nav;
   @extend .navbar-center;
   color: $navbar-font-color;
@@ -72,14 +80,14 @@
   font-family: bloody;
 }*/
 
-.navigationContent {
+.navigation-content {
   padding: 10px;
   background: url("img/doom_logo.png") no-repeat center;
   background-size: contain;
   min-height: 600px;
 }
 
-.mainContainer {
+.main-container {
   background-color: $background-color;
   color: $font-color;
   text-align: center;

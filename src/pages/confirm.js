@@ -5,14 +5,13 @@ import React from "react";
 import {connect} from "react-redux";
 import ACTIONS from "../store/actions";
 
-export const actionShowConfirm = (callbackAction, callbackProps, headerText, msgText) => ({
+export const actionShowConfirm = (callbacks, headerText, msgText) => ({
     type: ACTIONS.CONFIRM_SHOW,
-    callbackAction, callbackProps, headerText, msgText
+    callbacks, headerText, msgText
 })
 
 actionShowConfirm.propTypes = {
-    callbackProps: PropTypes.object,
-    callbackAction: PropTypes.string,
+    callbacks: PropTypes.object,
     headerText: PropTypes.string,
     msgText: PropTypes.string
 };
@@ -22,8 +21,8 @@ export const actionHideConfirm = () => ({
 })
 
 const actionYes = (state) => ({
-    type: state.callbackAction,
-    ...state.callbackProps
+    type: state.action,
+    ...state.props
 })
 
 export const reducer = (state = [], action) => {
@@ -31,8 +30,7 @@ export const reducer = (state = [], action) => {
         case ACTIONS.CONFIRM_SHOW:
             return {
                 visible: true,
-                callbackAction: action.callbackAction,
-                callbackProps: action.callbackProps,
+                callbacks: action.callbacks,
                 headerText: action.headerText,
                 msgText: action.msgText
             }
@@ -41,7 +39,7 @@ export const reducer = (state = [], action) => {
             return {
                 visible: false,
                 callbackAction: "-",
-                callbackProps: {},
+                callbacks: [],
                 headerText: "-",
                 msgText: "-"
             }
@@ -59,7 +57,7 @@ const dialog = ({state, onYes, onNo}) =>
             <Button variant="secondary" onClick={onNo}>
                 No
             </Button>
-            <Button variant="danger" onClick={() => onYes(state)} >
+            <Button variant="danger" onClick={() => onYes(state)}>
                 Yes
             </Button>
         </Modal.Footer>
@@ -69,7 +67,7 @@ export const Confirm = connect(
     state => ({state: {...state.confirm}}),
     dispatch => ({
             onYes(state) {
-                dispatch(actionYes(state))
+                state.callbacks.forEach(c => dispatch(actionYes(c)))
                 dispatch(actionHideConfirm())
             },
             onNo() {

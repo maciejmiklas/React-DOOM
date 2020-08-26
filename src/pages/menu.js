@@ -2,7 +2,7 @@ import React from "react";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
 import PropTypes from 'prop-types';
-import Navigation from "./navigation";
+import {Navigation} from "./navigation";
 import {connect} from "react-redux";
 import {actionGotoPage, PAGES} from "./router";
 import ACTIONS from "../store/actions";
@@ -46,12 +46,12 @@ menuElements.set(EL_QUICK_SAVE, {
 });
 
 menuElements.set(EL_MANAGE_WADS, {
-    action: (dispatch) => dispatch(actionGotoPage(PAGES.MANAGE_WADS)),
+    action: (dispatch) => dispatch(actionGotoPage(PAGES.WAD_MANAGE)),
     title: "MANAGE WADS"
 });
 
 menuElements.set(EL_UPLOAD_WADS, {
-    action: (dispatch) => dispatch(actionGotoPage(PAGES.UPLOAD_WADS)),
+    action: (dispatch) => dispatch(actionGotoPage(PAGES.WAD_UPLOAD, {p1: "hi!", p2: "ho!"})),
     title: "UPLOAD WADS"
 });
 
@@ -74,7 +74,7 @@ function visible(menu, name) {
     return menu.visible.includes(name);
 }
 
-function menu({dispatch, menu}) {
+function Menu({dispatch, menu}) {
     return (
         <Navigation>
             <Row className="menu">
@@ -89,7 +89,7 @@ function menu({dispatch, menu}) {
     )
 }
 
-const addElement = (state, element) => {
+const addMenuElement = (state, element) => {
     let newState = state;
     if (!state.visible.includes(element)) {
         newState = {
@@ -103,8 +103,8 @@ const addElement = (state, element) => {
 export const reducer = (state = [], action) => {
     let newState = state;
     switch (action.type) {
-        case ACTIONS.WADS_UPLOADED:
-            newState = addElement(state, EL_MANAGE_WADS);
+        case ACTIONS.WAD_UPLOADED:
+            newState = addMenuElement(state, EL_MANAGE_WADS);
     }
     return newState;
 }
@@ -123,4 +123,4 @@ MenuButton.propTypes = {
     visible: PropTypes.bool
 }
 
-export default connect(state => ({menu: {...state.menu}}))(menu);
+export default connect(state => ({menu: {...state.menu}}))(Menu);
