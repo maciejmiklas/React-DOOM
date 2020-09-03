@@ -25,8 +25,8 @@
   }
 }
 
-.wads-list{
-  display:inline-block !important;;
+.wads-list {
+  @extend .align-items-center;
 }
 
 .menu {
@@ -42,10 +42,15 @@
   @extend .mr-sm-2;
 }
 
+.wad-edit-form {
+  margin: 0 auto;
+  width:80%;
+}
 .msg-text {
   width: 80%;
-  text-align:left;
+  text-align: left;
 }
+
 .navbar-title {
   @extend .navbar-nav;
   @extend .navbar-center;
@@ -57,6 +62,7 @@
   left: 50%;
   transform: translatex(-50%);
 }
+
 .navigation {
   //@extend .crt;
   background-color: $screen-background-color;

@@ -76,8 +76,11 @@ module.exports = {
     },
     plugins: [
         new CleanWebpackPlugin(),
+
         new HtmlWebpackPlugin({
-            title: 'Development',
+            title: 'React DOOM',
+            template: './src/index.html',
+            chunks: ['react_doom']
         }),
 
         new MiniCssExtractPlugin({

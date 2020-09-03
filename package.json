@@ -38,7 +38,8 @@
     "clean-webpack-plugin": "latest",
     "reduce-reducers": "latest",
     "react-bootstrap-icons": "latest",
-    "moment": "latest"
+    "moment": "latest",
+    "redux-form": "latest"
   },
   "scripts": {
     "build": "webpack --mode development",

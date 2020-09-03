@@ -4,6 +4,8 @@ import {connect} from "react-redux";
 import ListGroup from "react-bootstrap/ListGroup";
 import {actionGotoPage, PAGES} from "./router";
 import Card from "react-bootstrap/Card";
+import Col from "react-bootstrap/Col";
+import Row from "react-bootstrap/Row";
 
 class ManageWadsTag extends Component {
     constructor(props) {
@@ -20,12 +22,14 @@ class ManageWadsTag extends Component {
             <Navigation>
                 <Card bg="dark">
                     <Card.Body>
-                        <ListGroup className="wads-list">
+                        <ListGroup className="wads-list" as={Row}>
                             {wads.map(wad =>
-                                <ListGroup.Item action key={wad.name} variant="dark"
-                                                onClick={() => dispatch(actionGotoPage(PAGES.WAD_EDIT, {wadName: wad.name}))} >
-                                    {wad.name}
-                                </ListGroup.Item>
+                                <Col sm={4} key={wad.name}>
+                                    <ListGroup.Item action variant="dark"
+                                                    onClick={() => dispatch(actionGotoPage(PAGES.WAD_EDIT, {wadName: wad.name}))}>
+                                        {wad.name}
+                                    </ListGroup.Item>
+                                </Col>
                             )}
                         </ListGroup>
                     </Card.Body>
