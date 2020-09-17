@@ -1,51 +1,119 @@
 import React, {Component} from "react";
-import {actionSetTitle, Navigation} from "./navigation";
+import {actionNavigationTitle, Navigation} from "./navigation";
 import Card from "react-bootstrap/Card";
 import {connect} from "react-redux";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import PropTypes from 'prop-types';
+import {actionWadRename} from "./uploadWads";
+import {actionSendMsg} from "./messages";
 
-const handleNameChange = (newName) => {
-    console.log("NEW NAME: " + newName)
+const handleNameChange = (name, oldName, newName, dispatch) => {
+    dispatch(actionSendMsg("Rename WAD from '" + oldName + "' to '" + newName + "'"))
+    dispatch(actionWadRename(oldName, newName));
+};
+
+class Input extends Component {
+
+    constructor(props) {
+        super(props);
+        this.handleInput = this.handleInput.bind(this);
+        this.handleUpdate = this.handleUpdate.bind(this);
+        this.state = {error: null}
+        this.dispatch = this.props.dispatch;
+        this.initialValue = this.props.value;
+        this.name = this.props.name;
+    }
+
+    handleInput(event) {
+        if (!this.props.onChange) {
+            return;
+        }
+        const value = event.target.value;
+        let error = null;
+        const {validate} = this.props;
+        if (validate) {
+            error = validate(value);
+            if (this.state.error !== error) {
+                this.setState({error});
+            }
+        }
+    }
+
+    handleUpdate(event) {
+        if (!this.props.onChange) {
+            return;
+        }
+        const value = event.target.value;
+        if (value && !this.state.error && value !== this.initialValue && value.trim !== "") {
+            this.props.onChange(this.name, this.initialValue, value, this.dispatch);
+        }
+    }
+
+    render() {
+        const {name, type, value, onChange} = this.props;
+        return (
+            <Form.Group as={Row} controlId={name}>
+                <Form.Label column sm={4}>{name}</Form.Label>
+                <Col sm={6}>
+                    <Form.Control type={type} placeholder={value} readOnly={onChange == null}
+                                  onChange={this.handleInput} isInvalid={this.state.error} onBlur={this.handleUpdate}/>
+                    <Form.Control.Feedback type="invalid">
+                        {this.state.error}
+                    </Form.Control.Feedback>
+                </Col>
+            </Form.Group>)
+    }
 }
-const FormEl = ({name, value, onChange, type = ""}) =>
-    <Form.Group as={Row} controlId={name}>
-        <Form.Label column sm={4}>{name}</Form.Label>
-        <Col sm={6}>
-            <Form.Control type={type} placeholder={value} readOnly={onChange == null} onChange={onChange}/>
-        </Col>
-    </Form.Group>
+
+Input.propTypes = {
+    onChange: PropTypes.func,
+    validate: PropTypes.func,
+    dispatch: PropTypes.func,
+    type: PropTypes.string,
+    name: PropTypes.string,
+    value: PropTypes.any,
+};
+
+const validateName = (value) => {
+    console.log(">>>> " + value)
+    if (value === "fred") {
+        return "NO FRED!"
+    }
+
+    return null;
+}
 
 class EditWadTag extends Component {
     constructor(props) {
         super(props);
+        this.wads = this.props.wads;
+        this.wadName = this.props.wadName;
+        this.wad = this.wads.files.find(w => w.name === this.wadName);
+        this.dispatch = this.props.dispatch;
     }
 
     componentDidMount() {
-        this.props.dispatch(actionSetTitle(this.props.wadName));
+        this.dispatch(actionNavigationTitle(this.props.wadName));
     }
 
     render() {
-        const {dispatch, wads, wadName} = this.props;
-        const wad = wads.files.find(w => w.name === wadName);
-
-        https://react-bootstrap.github.io/components/forms/#forms-validation-native
-
         return (
             <Navigation>
                 <Card bg="dark">
                     <Card.Body>
                         <div className="row">
                             <div className="col-md-6 offset-md-3">
-                                <Form>
-                                    <FormEl name="Name" value={wad.name} onChange={handleNameChange}/>
-                                    <FormEl name="Uploaded" value={wad.uploadTime}/>
-                                    <FormEl name="Last Played" value={wad.lastPlayed}/>
-                                    <FormEl name="Saves" value={wad.saves.length}/>
-                                    <FormEl name="Total Play Time" value={wad.stats.totalPlayTimeMs}/>
-                                    <FormEl name="Longest Session" value={wad.stats.longestSessionMs}/>
-                                    <FormEl name="Last Session" value={wad.stats.lastSessionMs}/>
+                                <Form noValidate>
+                                    <Input name="Name" value={this.wad.name} onChange={handleNameChange}
+                                           validate={validateName} dispatch={this.dispatch}/>
+                                    <Input name="Uploaded" value={this.wad.uploadTime}/>
+                                    <Input name="Last Played" value={this.wad.lastPlayed}/>
+                                    <Input name="Saves" value={this.wad.saves.length}/>
+                                    <Input name="Total Play Time" value={this.wad.stats.totalPlayTimeMs}/>
+                                    <Input name="Longest Session" value={this.wad.stats.longestSessionMs}/>
+                                    <Input name="Last Session" value={this.wad.stats.lastSessionMs}/>
                                 </Form>
                             </div>
                         </div>
@@ -55,6 +123,11 @@ class EditWadTag extends Component {
         )
     }
 }
+
+Input.propTypes = {
+    wads: PropTypes.object,
+    wadName: PropTypes.string,
+};
 
 
 export const reducer = (state = [], action) => {

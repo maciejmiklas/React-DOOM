@@ -4,17 +4,15 @@ export const initial = {
             name: "WAD_MANAGE",
             props: {}
         },
-
         previous: {
             name: "MENU",
             props: {},
         }
     },
     menu: {
-        visible: ["CONTROLS", "GRAPHICS", "SOUND", "UPLOAD_WADS", "MANAGE_WADS"]
+        visible: ["CONTROLS", "GRAPHICS", "SOUND", "UPLOAD_WADS", "MANAGE_WADS", "STORAGE"]
     },
-    messages: [
-    ],
+    messages: [],
     wads: {
         files: [
             {
@@ -33,7 +31,7 @@ export const initial = {
                 stats: {
                     totalPlayTimeMs: 0,
                     longestSessionMs: 0,
-                    lastSessionMs:0
+                    lastSessionMs: 0
                 }
             },
             {
@@ -52,7 +50,7 @@ export const initial = {
                 stats: {
                     totalPlayTimeMs: 0,
                     longestSessionMs: 0,
-                    lastSessionMs:0
+                    lastSessionMs: 0
                 }
             },
             {
@@ -71,17 +69,18 @@ export const initial = {
                 stats: {
                     totalPlayTimeMs: 0,
                     longestSessionMs: 0,
-                    lastSessionMs:0
+                    lastSessionMs: 0
                 }
             }
         ]
     },
     navigation: {
-        title: ""
+        title: "",
+        backEnabled: false
     },
     confirm: {
         visible: false,
-        callbacks:[],
+        callbacks: [],
         headerText: "-",
         msgText: "-",
     }

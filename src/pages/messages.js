@@ -1,7 +1,7 @@
 import ACTIONS from "../store/actions";
 import moment from "moment/moment";
 import React, {Component} from "react";
-import {actionSetTitle, Navigation} from "./navigation";
+import {actionNavigationTitle, Navigation} from "./navigation";
 import Table from "react-bootstrap/Table";
 import {connect} from "react-redux";
 
@@ -32,7 +32,7 @@ class MessagesListTag extends Component {
     }
 
     componentDidMount() {
-        this.props.dispatch(actionSetTitle("Messages"));
+        this.props.dispatch(actionNavigationTitle("Messages"));
     }
 
     render() {

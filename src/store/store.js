@@ -12,6 +12,31 @@ import reduceReducers from "reduce-reducers";
 
 const storeName = 'react-doom';
 
+const asyncDispatchMiddleware = store => next => action => {
+    let syncActivityFinished = false;
+    let actionQueue = [];
+
+    function flushQueue() {
+        actionQueue.forEach(a => store.dispatch(a)); // flush queue
+        actionQueue = [];
+    }
+
+    function asyncDispatch(asyncAction) {
+        actionQueue = actionQueue.concat([asyncAction]);
+
+        if (syncActivityFinished) {
+            flushQueue();
+        }
+    }
+
+    const actionWithAsyncDispatch =
+        Object.assign({}, action, {asyncDispatch});
+
+    next(actionWithAsyncDispatch);
+    syncActivityFinished = true;
+    flushQueue();
+};
+
 const saver = store => next => action => {
     let result = next(action);
     //localStorage[storeName] = JSON.stringify(store.getState());
@@ -32,6 +57,6 @@ const logger = store => next => action => {
 const wads = reduceReducers(initial, uploadWads, manageWads, editWad);
 const reducers = combineReducers({router, wads, confirm, menu, navigation, messages});
 const preloadedState = (localStorage[storeName]) ? JSON.parse(localStorage[storeName]) : initial;
-const store = applyMiddleware(logger, saver)(createStore)(reducers, preloadedState);
+const store = applyMiddleware(logger, saver, asyncDispatchMiddleware)(createStore)(reducers, preloadedState);
 
 export default store;

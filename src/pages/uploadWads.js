@@ -1,8 +1,7 @@
 import React, {Component} from "react";
-import {actionSetTitle, Navigation} from "./navigation";
+import {actionNavigationTitle, Navigation} from "./navigation";
 import Dropzone from "react-dropzone";
 import Card from "react-bootstrap/Card";
-import PropTypes from "prop-types";
 import {connect} from "react-redux";
 import {arrayBufferToBase64} from "../util";
 import {actionShowConfirm} from "./confirm";
@@ -29,7 +28,7 @@ class UploadWadsTag extends Component {
     }
 
     componentDidMount() {
-        this.props.dispatch(actionSetTitle("Upload WADs"))
+        this.props.dispatch(actionNavigationTitle("Upload WADs"))
     }
 
     render() {
@@ -57,7 +56,7 @@ function uploadFile(file, wads, dispatch) {
 
         if (wads.some(w => w.name === file.name)) {
             const callbacks = [{
-                action: ACTIONS.WAD_UPLOADED,
+                action: ACTIONS.WAD_UPLOAD,
                 props: {
                     fileName: file.name,
                     content: base64
@@ -70,25 +69,28 @@ function uploadFile(file, wads, dispatch) {
                     }
                 }
             ];
-            dispatch(actionShowConfirm(callbacks, "Overwrite?", "File '" + file.name + "' already exists, overwrite it?"));
+            dispatch(actionShowConfirm(callbacks, "Overwrite?", "File '" + file.name +
+                "' already exists, overwrite it?"));
         } else {
             dispatch(actionSendMsg(`WAD uploaded: ${file.name}`));
-            dispatch(actionFileUploaded(file.name, base64));
+            dispatch(actionWadUpload(file.name, base64));
         }
 
     }
     reader.readAsArrayBuffer(file);
 }
 
-export const actionFileUploaded = (fileName, content) => ({
-    type: ACTIONS.WAD_UPLOADED,
+export const actionWadUpload = (fileName, content) => ({
+    type: ACTIONS.WAD_UPLOAD,
     fileName,
     content
 })
 
-actionFileUploaded.propTypes = {
-    file: PropTypes.object
-}
+export const actionWadRename = (oldName, newName) => ({
+    type: ACTIONS.WAD_RENAME,
+    oldName,
+    newName
+})
 
 const getWadName = (fileName) => {
     let newName = fileName;
@@ -96,20 +98,29 @@ const getWadName = (fileName) => {
     if (dotIdx) {
         newName = fileName.substring(0, dotIdx);
     }
-
     return newName;
 }
 
-// TODO create function that will return initial data for new was instead hardcoding it here
 export const reducer = (state = [], action) => {
     let newState = state;
     switch (action.type) {
-        case ACTIONS.WAD_UPLOADED:
+        case ACTIONS.WAD_RENAME:
+            const {oldName, newName} = action;
+            newState = {
+                ...state,
+                files: [
+                    {...state.files.find(wad => wad.name === oldName), name: newName},
+                    ...state.files.filter(wad => wad.name !== oldName)
+                ]
+            }
+            break;
+        case ACTIONS.WAD_UPLOAD:
             newState = {
                 ...state,
                 files: [
                     ...state.files,
                     {
+                        // TODO create function that will return initial data for new was instead hardcoding it here
                         name: getWadName(action.fileName),
                         content: action.content,
                         uploadTime: new Date(),
@@ -118,10 +129,11 @@ export const reducer = (state = [], action) => {
                         stats: {
                             totalPlayTimeMs: 0,
                             longestSessionMs: 0,
-                            lastSessionMs:0
+                            lastSessionMs: 0
                         }
                     }]
             }
+            break;
     }
     return newState;
 }

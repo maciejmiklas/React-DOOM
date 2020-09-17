@@ -47,7 +47,7 @@ export const reducer = (state = [], action) => {
     return state;
 }
 
-const dialog = ({state, onYes, onNo}) =>
+const ConfirmComp = ({state, onYes, onNo}) =>
     <Modal show={state.visible} onHide={onNo}>
         <Modal.Header closeButton>
             <Modal.Title>{state.headerText}</Modal.Title>
@@ -75,4 +75,4 @@ export const Confirm = connect(
             }
         }
     )
-)(dialog)
+)(ConfirmComp)

@@ -13,7 +13,7 @@ import Popover from "react-bootstrap/Popover";
 
 const aboutPopover = (
     <Popover>
-        <Popover.Title as="h3">DOOM by Maciej Miklas </Popover.Title>
+        <Popover.Title as="h3">DOOM by Maciej Miklas</Popover.Title>
         <Popover.Content>
             Implemented in React/Redux on Apache 2.0 Open Source License
         </Popover.Content>
@@ -24,7 +24,7 @@ class NavigationTag extends Component {
 
     constructor(props) {
         super(props);
-        this.props.dispatch(actionSetTitle(""))
+        this.props.dispatch(actionNavigationTitle(""))
     }
 
     render() {
@@ -42,7 +42,7 @@ class NavigationTag extends Component {
 
                         <NavIcon dispatch={dispatch}
                                  action={(dispatch) => dispatch(actionGotoPrevious())} tooltipOn="bottom"
-                                 tooltipText="Go back"><ArrowReturnLeft/></NavIcon>
+                                 tooltipText="Go back" enabled={nav.backEnabled}><ArrowReturnLeft/></NavIcon>
                     </Navbar>
 
                     <div className="navigation-content">
@@ -69,7 +69,12 @@ class NavigationTag extends Component {
     }
 }
 
-export const actionSetTitle = (title) => ({
+export const actionNavigationBack = (backEnabled) => ({
+    type: ACTIONS.NAVIGATION_ENABLE_BACK,
+    backEnabled
+})
+
+export const actionNavigationTitle = (title, backEnabled = true) => ({
     type: ACTIONS.NAVIGATION_SET_TITLE,
     title
 })
@@ -77,20 +82,27 @@ export const actionSetTitle = (title) => ({
 export const reducer = (state = [], action) => {
     let newState = state;
     switch (action.type) {
+        case ACTIONS.NAVIGATION_ENABLE_BACK:
+            newState = {
+                ...state,
+                backEnabled: action.backEnabled
+            }
+            break;
         case ACTIONS.NAVIGATION_SET_TITLE:
             newState = {
                 ...state,
                 title: action.title
             }
+            break;
     }
     return newState;
 }
 
-const NavIcon = ({dispatch, children, action, tooltipOn = "top", tooltipText = ""}) =>
+const NavIcon = ({dispatch, children, action, tooltipOn = "top", tooltipText = "", enabled = true}) =>
     <NavButton dispatch={dispatch} children={children} action={action}
-               tooltipOn={tooltipOn} tooltipText={tooltipText}/>
+               tooltipOn={tooltipOn} tooltipText={tooltipText} enabled={enabled}/>
 
-const NavButton = ({dispatch, children, action, className = "", tooltipOn = "top", tooltipText = ""}) =>
+const NavButton = ({dispatch, children, action, className = "", tooltipOn = "top", tooltipText = "", enabled = true}) =>
     <OverlayTrigger
         placement={tooltipOn}
         overlay={
@@ -100,7 +112,7 @@ const NavButton = ({dispatch, children, action, className = "", tooltipOn = "top
         }
     >
         <Button onClick={() => action(dispatch)} variant="outline-secondary"
-                className={`${className} navbarButton`}>{children}
+                className={`${className} navbarButton`} hidden={!enabled}>{children}
         </Button>
     </OverlayTrigger>
 

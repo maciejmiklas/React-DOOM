@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {actionSetTitle, Navigation} from "./navigation";
+import {actionNavigationTitle, Navigation} from "./navigation";
 import {connect} from "react-redux";
 import ListGroup from "react-bootstrap/ListGroup";
 import {actionGotoPage, PAGES} from "./router";
@@ -13,7 +13,7 @@ class ManageWadsTag extends Component {
     }
 
     componentDidMount() {
-        this.props.dispatch(actionSetTitle("Manage WADs"))
+        this.props.dispatch(actionNavigationTitle("Manage WADs"))
     }
 
     render() {

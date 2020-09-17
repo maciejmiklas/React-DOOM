@@ -9,6 +9,19 @@ import {UploadWads} from "./uploadWads";
 import PropTypes from "prop-types";
 import ACTIONS from "../store/actions";
 import {MessageList} from "./messages";
+import {actionNavigationBack} from "./navigation";
+
+export const PAGES = {
+    PLAY_PAGE: "PLAY_PAGE",
+    WAD_MANAGE: "WAD_MANAGE",
+    WAD_UPLOAD: "WAD_UPLOAD",
+    STORAGE: "STORAGE",
+    WAD_EDIT: "WAD_EDIT",
+    MENU: "MENU",
+    MESSAGES: "MESSAGES"
+};
+
+const previousNotSupported = [PAGES.WAD_EDIT]
 
 const components = {
     PLAY_PAGE: connect(null, dispatch => ({
@@ -45,44 +58,50 @@ export const actionGotoPage = (page, props) => ({
 })
 
 actionGotoPage.propTypes = {
+    dispatch: PropTypes.object,
     page: PropTypes.string,
     props: PropTypes.object
+}
+
+const configureBack = (action, previous) => {
+    action.asyncDispatch(actionNavigationBack(previousNotSupported.find(v => v === previous.name) === undefined));
 }
 
 export const reducer = (state = [], action) => {
     let newState = state;
     switch (action.type) {
         case ACTIONS.ROUTER_GOTO_PAGE:
+            let previous = state.active;
             newState = {
                 ...state,
-                previous: state.active,
+                previous,
                 active: {
                     name: action.page,
                     props: action.props
-                }
+                },
+                previousEnabled: true
             }
+            configureBack(action, previous);
             break;
         case ACTIONS.ROUTER_GOTO_PREVIOUS: {
-            const active = state.active;
             const previous = state.previous;
+            const active = state.active;
+            if (!previous || !active) {
+                break;
+            }
+            if (previousNotSupported.find(v => v === previous.name)) {
+                break;
+            }
             newState = {
                 ...state,
                 previous: active,
                 active: previous
             }
+            configureBack(action, active);
             break;
         }
     }
     return newState;
 }
-
-export const PAGES = {
-    PLAY_PAGE: "PLAY_PAGE",
-    WAD_MANAGE: "WAD_MANAGE",
-    WAD_UPLOAD: "WAD_UPLOAD",
-    WAD_EDIT: "WAD_EDIT",
-    MENU: "MENU",
-    "MESSAGES": "MESSAGES"
-};
 
 export const Router = connect(state => ({router: {...state.router}}))(RouterComponent)

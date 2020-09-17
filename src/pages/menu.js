@@ -17,6 +17,7 @@ const EL_UPLOAD_WADS = "UPLOAD_WADS";
 const EL_CONTROLS = "CONTROLS";
 const EL_GRAPHICS = "GRAPHICS";
 const EL_SOUND = "SOUND";
+const EL_STORAGE = "STORAGE";
 
 const menuElements = new Map();
 
@@ -70,6 +71,11 @@ menuElements.set(EL_SOUND, {
     title: "SOUND"
 });
 
+menuElements.set(EL_STORAGE, {
+    action: (dispatch) => console.log("STORAGE"),
+    title: "STORAGE"
+});
+
 function visible(menu, name) {
     return menu.visible.includes(name);
 }
@@ -103,7 +109,7 @@ const addMenuElement = (state, element) => {
 export const reducer = (state = [], action) => {
     let newState = state;
     switch (action.type) {
-        case ACTIONS.WAD_UPLOADED:
+        case ACTIONS.WAD_UPLOAD:
             newState = addMenuElement(state, EL_MANAGE_WADS);
     }
     return newState;
