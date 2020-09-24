@@ -1,0 +1,42 @@
+@import "variables";
+
+$btn-padding-x: 33px;
+$dark: $dialog-color;
+$primary: $menu-bg;
+
+$input-bg: $input-active-bg;
+$input-disabled-bg: $input-inactive-bg;
+$input-color:$input-font-color;
+
+$modal-content-bg: $dialog-color;
+$modal-content-color: $font-color;
+$modal-content-border-color: $font-color;
+$modal-header-border-color: $font-color;
+$close-color: $font-color;
+
+// #############################################
+@import "~bootstrap/scss/bootstrap";
+// #############################################
+
+.menu {
+  @extend .justify-content-md-center;
+  font-family: bloody;
+}
+
+.menu-button {
+  @extend .btn-nav-primary
+}
+
+@each $variant, $color in $theme-colors {
+  .btn-nav-#{$variant} {
+    @extend .btn;
+    @include button-variant($color, $menu-button-border);
+    font-size: xx-large;
+    color: $font-color;
+
+    @include hover() {
+      color: $font-color;
+      @include gradient-bg(darken($color, 100%));
+    }
+  }
+}

@@ -10,6 +10,7 @@ import PropTypes from "prop-types";
 import ACTIONS from "../store/actions";
 import {MessageList} from "./messages";
 import {actionNavigationBack} from "./navigation";
+import {ManageStorage} from "./manageStorage";
 
 export const PAGES = {
     PLAY_PAGE: "PLAY_PAGE",
@@ -18,7 +19,7 @@ export const PAGES = {
     STORAGE: "STORAGE",
     WAD_EDIT: "WAD_EDIT",
     MENU: "MENU",
-    MESSAGES: "MESSAGES"
+    MESSAGES: "MESSAGES",
 };
 
 const previousNotSupported = [PAGES.WAD_EDIT]
@@ -32,7 +33,8 @@ const components = {
     WAD_UPLOAD: UploadWads,
     WAD_EDIT: EditWad,
     MENU: Menu,
-    MESSAGES: MessageList
+    MESSAGES: MessageList,
+    STORAGE: ManageStorage
 }
 
 class RouterComponent extends Component {

@@ -52,7 +52,7 @@ menuElements.set(EL_MANAGE_WADS, {
 });
 
 menuElements.set(EL_UPLOAD_WADS, {
-    action: (dispatch) => dispatch(actionGotoPage(PAGES.WAD_UPLOAD, {p1: "hi!", p2: "ho!"})),
+    action: (dispatch) => dispatch(actionGotoPage(PAGES.WAD_UPLOAD)),
     title: "UPLOAD WADS"
 });
 
@@ -72,7 +72,7 @@ menuElements.set(EL_SOUND, {
 });
 
 menuElements.set(EL_STORAGE, {
-    action: (dispatch) => console.log("STORAGE"),
+    action: (dispatch) => dispatch(actionGotoPage(PAGES.STORAGE)),
     title: "STORAGE"
 });
 

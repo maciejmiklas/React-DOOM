@@ -39,7 +39,11 @@
     "reduce-reducers": "latest",
     "react-bootstrap-icons": "latest",
     "moment": "latest",
-    "redux-form": "latest"
+    "redux-form": "latest",
+    "jsoneditor": "latest",
+    "jsoneditor-react": "latest",
+    "brace": "latest",
+    "ace": "latest"
   },
   "scripts": {
     "build": "webpack --mode development",

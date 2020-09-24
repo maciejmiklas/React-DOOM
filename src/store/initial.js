@@ -1,7 +1,7 @@
 export const initial = {
     router: {
         active: {
-            name: "WAD_MANAGE",
+            name: "STORAGE",
             props: {}
         },
         previous: {

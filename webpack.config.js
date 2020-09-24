@@ -28,7 +28,7 @@ module.exports = {
             //    <link rel="stylesheet" type="text/css" href="dist/react_doom.css">
             // 3) disable other scss-module
             {
-                test: /\.Xscss$/,
+                test: /\.XXXX(sa|sc|c)ss$/,
                 use: [
                     {
                         loader: MiniCssExtractPlugin.loader,
@@ -43,7 +43,7 @@ module.exports = {
 
             // In order to use inline CSS enable this module and remove  <link rel="stylesheet" ... /> from index.html
             {
-                test: /\.scss$/,
+                test: /\.(sa|sc|c)ss$/,
                 use: [
                     'style-loader', // creates style nodes from JS strings
                     'css-loader', // translates CSS into CommonJS

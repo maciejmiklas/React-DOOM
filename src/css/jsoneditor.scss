@@ -1,0 +1,34 @@
+@import "variables";
+
+// Proper css customization can be archived after this issue is resolved.
+// https://github.com/vankop/jsoneditor-react/issues/41
+
+.jsoneditor-field {
+  color: $font-color !important;
+}
+
+.jsoneditor-navigation-bar {
+  background-color: $dialog-color !important;
+  color: $font-color !important;
+}
+
+div.jsoneditor-tree button.jsoneditor-button:focus {
+  background: $dialog-color !important;
+}
+
+.jsoneditor {
+  border: thin solid $navbar-border-color !important;
+}
+
+.jsoneditor-array {
+  color: $navbar-font-color !important;
+}
+
+.jsoneditor-object {
+  color: $navbar-font-color !important;
+}
+
+.jsoneditor-menu {
+  background-color: $dialog-color !important;
+  border-bottom: 1px solid $navbar-border-color !important;
+}
