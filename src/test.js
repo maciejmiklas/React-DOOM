@@ -1,3 +1,3 @@
-let aaa = {}
+import {WadReader} from "./wad/WadReader";
 
-console.log([...aaa.bal])
+const reader = new WadReader("HI")

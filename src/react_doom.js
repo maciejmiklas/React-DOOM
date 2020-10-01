@@ -1,9 +1,9 @@
 import React from "react";
 import './css/react_doom.scss'
 import {render} from "react-dom";
-import {Router} from "./pages/router";
+import {Router} from "./pages/Router";
 import {Provider} from "react-redux";
-import store from "./store/store";
+import store from "./store/Store";
 
 const main =
     <Provider store={store}>
