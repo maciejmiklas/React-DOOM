@@ -6,13 +6,7 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import PropTypes from 'prop-types';
-import {actionWadRename} from "./UploadWads";
-import {actionSendMsg} from "./Messages";
-
-const handleNameChange = (name, oldName, newName, dispatch) => {
-    dispatch(actionSendMsg("Rename WAD from '" + oldName + "' to '" + newName + "'"))
-    dispatch(actionWadRename(oldName, newName));
-};
+import Actions from "../store/Actions";
 
 class Input extends Component {
 
@@ -21,13 +15,12 @@ class Input extends Component {
         this.handleInput = this.handleInput.bind(this);
         this.handleUpdate = this.handleUpdate.bind(this);
         this.state = {error: null}
-        this.dispatch = this.props.dispatch;
         this.initialValue = this.props.value;
-        this.name = this.props.name;
+        this.onChange = this.props.onChange
     }
 
     handleInput(event) {
-        if (!this.props.onChange) {
+        if (!this.onChange) {
             return;
         }
         const value = event.target.value;
@@ -42,12 +35,12 @@ class Input extends Component {
     }
 
     handleUpdate(event) {
-        if (!this.props.onChange) {
+        if (!this.onChange) {
             return;
         }
         const value = event.target.value;
         if (value && !this.state.error && value !== this.initialValue && value.trim !== "") {
-            this.props.onChange(this.name, this.initialValue, value, this.dispatch);
+            this.onChange(this.initialValue, value);
         }
     }
 
@@ -70,36 +63,26 @@ class Input extends Component {
 Input.propTypes = {
     onChange: PropTypes.func,
     validate: PropTypes.func,
-    dispatch: PropTypes.func,
     type: PropTypes.string,
-    name: PropTypes.string,
     value: PropTypes.any,
 };
+
 
 class EditWadTag extends Component {
     constructor(props) {
         super(props);
-        this.wads = this.props.wads;
-        this.wadName = this.props.wadName;
-        this.wad = this.wads.files.find(w => w.name === this.wadName);
-        this.dispatch = this.props.dispatch;
-        this.validateName = this.validateName.bind(this);
-    }
-
-    validateName(value) {
-        if (this.wad.name === value) {
-            return;
-        }
-        if (this.wads.files.filter(w => w.name === value).length > 0) {
-            return "Name already taken";
-        }
     }
 
     componentDidMount() {
-        this.dispatch(actionNavigationTitle(this.props.wadName));
+        this.props.updateTitle();
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        return nextProps.wad !== undefined;
     }
 
     render() {
+        const {wad, validateWadName, handleNameChange} = this.props
         return (
             <Navigation>
                 <Card bg="dark">
@@ -107,14 +90,14 @@ class EditWadTag extends Component {
                         <div className="row">
                             <div className="col-md-6 offset-md-3">
                                 <Form noValidate>
-                                    <Input name="Name" value={this.wad.name} onChange={handleNameChange}
-                                           validate={this.validateName} dispatch={this.dispatch}/>
-                                    <Input name="Uploaded" value={this.wad.uploadTime}/>
-                                    <Input name="Last Played" value={this.wad.lastPlayed}/>
-                                    <Input name="Saves" value={this.wad.saves.length}/>
-                                    <Input name="Total Play Time" value={this.wad.stats.totalPlayTimeMs}/>
-                                    <Input name="Longest Session" value={this.wad.stats.longestSessionMs}/>
-                                    <Input name="Last Session" value={this.wad.stats.lastSessionMs}/>
+                                    <Input name="Name" value={wad.name} onChange={handleNameChange}
+                                           validate={validateWadName}/>
+                                    <Input name="Uploaded" value={wad.uploadTime}/>
+                                    <Input name="Last Played" value={wad.lastPlayed}/>
+                                    <Input name="Saves" value={wad.saves.length}/>
+                                    <Input name="Total Play Time" value={wad.stats.totalPlayTimeMs}/>
+                                    <Input name="Longest Session" value={wad.stats.longestSessionMs}/>
+                                    <Input name="Last Session" value={wad.stats.lastSessionMs}/>
                                 </Form>
                             </div>
                         </div>
@@ -125,17 +108,61 @@ class EditWadTag extends Component {
     }
 }
 
-Input.propTypes = {
-    wads: PropTypes.object,
+EditWadTag.propTypes = {
+    updateTitle: PropTypes.func,
+    handleNameChange: PropTypes.func,
+    validateWadName: PropTypes.func,
+    wad: PropTypes.object,
     wadName: PropTypes.string,
 };
-
 
 export const reducer = (state = [], action) => {
     let newState = state;
     switch (action.type) {
+        case Actions.WAD_RENAME:
+            const {oldName, newName} = action;
+            newState = {
+                ...state,
+                files: [
+                    {...state.files.find(wad => wad.name === oldName), name: newName},
+                    ...state.files.filter(wad => wad.name !== oldName)
+                ]
+            }
+            break;
     }
     return newState;
 }
 
-export const EditWad = connect(state => ({wads: {...state.wads}}))(EditWadTag);
+const validateWadName = (allWadNames, editingName) => newName => {
+    if (editingName === newName) {
+        return;
+    }
+    if (allWadNames.filter(w => w === newName).length > 0) {
+        return "Name already taken";
+    }
+}
+
+const prepState = (state, wadName) => {
+    const wads = {...state.wads};
+    const wadNameStr = wadName.wadName;
+    return {
+        wad: wads.files.find(w => w.name === wadNameStr),
+        validateWadName: validateWadName(wads.files.map(w => w.name), wadNameStr)
+    }
+}
+
+const prepDispatch = (dispatch, wadName) => {
+    const wadNameStr = wadName.wadName;
+    return {
+        updateTitle: () => dispatch(actionNavigationTitle(wadNameStr)),
+        handleNameChange: (oldName, newName) => dispatch(actionWadRename(oldName, newName))
+    }
+}
+
+export const actionWadRename = (oldName, newName) => ({
+    type: Actions.WAD_RENAME,
+    oldName,
+    newName
+})
+
+export const EditWad = connect(prepState, prepDispatch)(EditWadTag);

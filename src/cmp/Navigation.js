@@ -4,7 +4,7 @@ import Navbar from "react-bootstrap/Navbar";
 import Button from "react-bootstrap/Button";
 import {connect} from "react-redux";
 import {actionGotoPage, actionGotoPrevious, PAGES} from "./Router";
-import {Confirm} from "./Confirm";
+import {ConfirmStore} from "./ConfirmStore";
 import {ArrowReturnLeft, Info, JustifyLeft} from 'react-bootstrap-icons';
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
@@ -63,7 +63,6 @@ class NavigationTag extends Component {
                                  tooltipText="Messages"><JustifyLeft/></NavIcon>
                     </Navbar>
                 </div>
-                <Confirm/>
             </Container>
         )
     }

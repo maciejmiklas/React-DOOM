@@ -4,7 +4,11 @@ import Card from "react-bootstrap/Card";
 import {connect} from "react-redux";
 import {JsonEditor} from 'jsoneditor-react';
 import Button from "react-bootstrap/Button";
-import {actionSendMsg} from "./Messages";
+import Actions from "../store/Actions";
+
+const actionStorageDownloaded = () => ({
+    type: Actions.STORAGE_DOWNLOADED,
+})
 
 class StorageTag extends Component {
     constructor(props) {
@@ -30,7 +34,7 @@ class StorageTag extends Component {
     downloadStorage() {
         const json = JSON.stringify(this.props.root, null, "\t");
         this.saveData(json, 'storage.json');
-        this.props.dispatch(actionSendMsg("Storage downloaded"));
+        this.props.dispatch(actionStorageDownloaded());
     }
 
     render() {

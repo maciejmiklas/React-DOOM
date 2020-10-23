@@ -1,13 +1,13 @@
 import {applyMiddleware, combineReducers, createStore} from 'redux'
 import {initial} from "./initial";
-import {reducer as router} from "../pages/Router";
-import {reducer as uploadWads} from "../pages/UploadWads";
-import {reducer as manageWads} from "../pages/ManageWads";
-import {reducer as editWad} from "../pages/EditWad";
-import {reducer as messages} from "../pages/Messages";
-import {reducer as confirm} from "../pages/Confirm"
-import {reducer as navigation} from "../pages/Navigation"
-import {reducer as menu} from "../pages/Menu"
+import {reducer as router} from "../cmp/Router";
+import {reducer as uploadWads} from "../cmp/UploadWads";
+import {reducer as manageWads} from "../cmp/ManageWads";
+import {reducer as editWad} from "../cmp/EditWad";
+import {reducer as messages} from "../cmp/Messages";
+import {reducer as confirm} from "../cmp/ConfirmStore"
+import {reducer as navigation} from "../cmp/Navigation"
+import {reducer as menu} from "../cmp/Menu"
 import reduceReducers from "reduce-reducers";
 
 const storeName = 'react-doom';

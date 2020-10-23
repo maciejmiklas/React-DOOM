@@ -3,7 +3,7 @@ import Alert from "react-bootstrap/Alert";
 import PropTypes from "prop-types";
 import {Navigation} from "./Navigation";
 
-function playPage({onExit}) {
+function PlayPage({onExit}) {
     return (
         <Navigation>
             <Alert variant="danger" onClose={onExit} dismissible>
@@ -17,8 +17,8 @@ function playPage({onExit}) {
 }
 
 
-playPage.propTypes = {
+PlayPage.propTypes = {
     onExit: PropTypes.func
 }
 
-export default playPage;
+export default PlayPage;

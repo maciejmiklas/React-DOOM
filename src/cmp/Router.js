@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import playPage from "./PlayPage";
+import PlayPage from "./PlayPage";
 import Menu from "./Menu";
 import {ManageWads} from "./ManageWads";
 import {EditWad} from "./EditWad";
@@ -27,7 +27,7 @@ const previousNotSupported = [PAGES.WAD_EDIT]
 const components = {
     PLAY_PAGE: connect(null, dispatch => ({
         onExit: () => dispatch(actionGotoPage(PAGES.PLAY_PAGE))
-    }))(playPage),
+    }))(PlayPage),
 
     WAD_MANAGE: ManageWads,
     WAD_UPLOAD: UploadWads,
@@ -48,7 +48,6 @@ class RouterComponent extends Component {
         return (<TagName {...router.active.props}/>)
     }
 }
-
 export const actionGotoPrevious = () => ({
     type: Actions.ROUTER_GOTO_PREVIOUS
 })
