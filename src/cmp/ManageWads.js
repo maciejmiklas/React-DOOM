@@ -7,17 +7,30 @@ import Card from "react-bootstrap/Card";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 
+// ################### ACTIONS ###################
+
+// ################### ACTIONS ###################
+
+// ################### REDUCER ###################
+export const reducer = (state = [], action) => {
+    let newState = state;
+    switch (action.type) {
+    }
+    return newState;
+}
+// ################### REDUCER ###################
+
 class ManageWadsTag extends Component {
     constructor(props) {
         super(props);
     }
 
     componentDidMount() {
-        this.props.dispatch(actionNavigationTitle("Manage WADs"))
+        this.props.updateTitle();
     }
 
     render() {
-        const {wads, dispatch} = this.props;
+        const {wads, editWad} = this.props;
         return (
             <Navigation>
                 <Card bg="dark">
@@ -25,8 +38,7 @@ class ManageWadsTag extends Component {
                         <ListGroup className="wads-list" as={Row}>
                             {wads.map(wad =>
                                 <Col sm={4} key={wad.name}>
-                                    <ListGroup.Item action variant="dark"
-                                                    onClick={() => dispatch(actionGotoPage(PAGES.WAD_EDIT, {wadName: wad.name}))}>
+                                    <ListGroup.Item action variant="dark" onClick={() => editWad(wad.name)}>
                                         {wad.name}
                                     </ListGroup.Item>
                                 </Col>
@@ -38,11 +50,13 @@ class ManageWadsTag extends Component {
     }
 }
 
-export const reducer = (state = [], action) => {
-    let newState = state;
-    switch (action.type) {
+const stateToProps = state => ({wads: [...state.wads.files]});
+const dispatchToProps = dispatch => ({
+    editWad: wadName => {
+        dispatch(actionGotoPage(PAGES.WAD_EDIT, {wadName}))
+    },
+    updateTitle: () => {
+        dispatch(actionNavigationTitle("Manage WADs"))
     }
-    return newState;
-}
-
-export const ManageWads = connect(state => ({wads: [...state.wads.files]}))(ManageWadsTag);
+});
+export const ManageWads = connect(stateToProps, dispatchToProps)(ManageWadsTag);

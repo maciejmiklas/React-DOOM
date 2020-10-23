@@ -85,3 +85,9 @@
   text-align: center;
 }
 
+.uploadDropzone {
+  min-height: 600px;
+  color: $screen-background;
+  background: url("img/floppy_disc.png") no-repeat center;
+}
+

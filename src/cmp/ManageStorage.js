@@ -6,9 +6,15 @@ import {JsonEditor} from 'jsoneditor-react';
 import Button from "react-bootstrap/Button";
 import Actions from "../store/Actions";
 
+// ################### ACTIONS ###################
 const actionStorageDownloaded = () => ({
     type: Actions.STORAGE_DOWNLOADED,
 })
+// ################### ACTIONS ###################
+
+// ################### REDUCER ###################
+
+// ################### REDUCER ###################
 
 class StorageTag extends Component {
     constructor(props) {
@@ -17,7 +23,7 @@ class StorageTag extends Component {
     }
 
     componentDidMount() {
-        this.props.dispatch(actionNavigationTitle("Application Storage (React State)"))
+        this.props.updateTitle()
     }
 
     saveData(data, fileName) {
@@ -62,5 +68,8 @@ const SButton = ({onClick, title, disabled = false}) =>
         {title}
     </Button>
 
-
-export const ManageStorage = connect(state => ({root: {...state}}))(StorageTag)
+const stateToProps = state => ({root: {...state}});
+const dispatchToProps = dispatch => ({
+    updateTitle: () => dispatch(actionNavigationTitle("Application Storage (React State)"))
+});
+export const ManageStorage = connect(stateToProps, dispatchToProps)(StorageTag)

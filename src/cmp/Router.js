@@ -5,12 +5,68 @@ import Menu from "./Menu";
 import {ManageWads} from "./ManageWads";
 import {EditWad} from "./EditWad";
 import {UploadWads} from "./UploadWads";
-
+import * as R from "ramda";
 import PropTypes from "prop-types";
 import Actions from "../store/Actions";
 import {MessageList} from "./Messages";
 import {actionNavigationBack} from "./Navigation";
 import {ManageStorage} from "./ManageStorage";
+
+// ################### ACTIONS ###################
+export const actionGotoPrevious = () => ({
+    type: Actions.ROUTER_GOTO_PREVIOUS
+})
+
+export const actionGotoPage = (pageName, pageProps) => ({
+    type: Actions.ROUTER_GOTO_PAGE,
+    pageName,
+    pageProps
+})
+actionGotoPage.propTypes = {
+    pageName: PropTypes.string,
+    pageProps: PropTypes.object
+}
+// ################### ACTIONS ###################
+
+// ################### REDUCER ###################
+export const reducer = (state = [], action) => {
+    let newState = state;
+    switch (action.type) {
+        case Actions.ROUTER_GOTO_PAGE:
+            let previous = state.active;
+            newState = {
+                ...state,
+                previous,
+                active: {
+                    pageName: action.pageName,
+                    pageProps: action.pageProps
+                },
+                previousEnabled: true
+            }
+            configureBack(action, previous);
+            break;
+
+        case Actions.ROUTER_GOTO_PREVIOUS: {
+            const previous = state.previous;
+            const active = state.active;
+            if (!previous || !active) {
+                break;
+            }
+            if (previousNotSupported.find(v => v === previous.pageName)) {
+                break;
+            }
+            newState = {
+                ...state,
+                previous: active,
+                active: previous
+            }
+            configureBack(action, active);
+            break;
+        }
+    }
+    return newState;
+}
+// ################### REDUCER ###################
 
 export const PAGES = {
     PLAY_PAGE: "PLAY_PAGE",
@@ -43,66 +99,14 @@ class RouterComponent extends Component {
     }
 
     render() {
-        const {router} = this.props;
-        const TagName = components[router.active.name]
-        return (<TagName {...router.active.props}/>)
+        const {pageName, pageProps} = this.props;
+        const TagName = components[pageName]
+        return (<TagName {...pageProps}/>)
     }
-}
-export const actionGotoPrevious = () => ({
-    type: Actions.ROUTER_GOTO_PREVIOUS
-})
-
-export const actionGotoPage = (page, props) => ({
-    type: Actions.ROUTER_GOTO_PAGE,
-    page,
-    props
-})
-
-actionGotoPage.propTypes = {
-    dispatch: PropTypes.object,
-    page: PropTypes.string,
-    props: PropTypes.object
 }
 
 const configureBack = (action, previous) => {
-    action.asyncDispatch(actionNavigationBack(previousNotSupported.find(v => v === previous.name) === undefined));
+    action.asyncDispatch(actionNavigationBack(previousNotSupported.find(v => v === previous.pageName) === undefined));
 }
 
-export const reducer = (state = [], action) => {
-    let newState = state;
-    switch (action.type) {
-        case Actions.ROUTER_GOTO_PAGE:
-            let previous = state.active;
-            newState = {
-                ...state,
-                previous,
-                active: {
-                    name: action.page,
-                    props: action.props
-                },
-                previousEnabled: true
-            }
-            configureBack(action, previous);
-            break;
-        case Actions.ROUTER_GOTO_PREVIOUS: {
-            const previous = state.previous;
-            const active = state.active;
-            if (!previous || !active) {
-                break;
-            }
-            if (previousNotSupported.find(v => v === previous.name)) {
-                break;
-            }
-            newState = {
-                ...state,
-                previous: active,
-                active: previous
-            }
-            configureBack(action, active);
-            break;
-        }
-    }
-    return newState;
-}
-
-export const Router = connect(state => ({router: {...state.router}}))(RouterComponent)
+export const Router = connect(state => ({...state.router.active}))(RouterComponent)

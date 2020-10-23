@@ -4,70 +4,13 @@ import Navbar from "react-bootstrap/Navbar";
 import Button from "react-bootstrap/Button";
 import {connect} from "react-redux";
 import {actionGotoPage, actionGotoPrevious, PAGES} from "./Router";
-import {ConfirmStore} from "./ConfirmStore";
 import {ArrowReturnLeft, Info, JustifyLeft} from 'react-bootstrap-icons';
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 import Actions from "../store/Actions";
 import Popover from "react-bootstrap/Popover";
 
-const aboutPopover = (
-    <Popover>
-        <Popover.Title as="h3">DOOM by Maciej Miklas</Popover.Title>
-        <Popover.Content>
-            Implemented in React/Redux on Apache 2.0 Open Source License
-        </Popover.Content>
-    </Popover>
-);
-
-class NavigationTag extends Component {
-
-    constructor(props) {
-        super(props);
-        this.props.dispatch(actionNavigationTitle(""))
-    }
-
-    render() {
-        const {dispatch, nav, children} = this.props;
-        return (
-            <Container>
-                <div className="navigation">
-                    <Navbar bg="dark">
-                        <NavButton dispatch={dispatch}
-                                   action={(dispatch) => dispatch(actionGotoPage(PAGES.MENU))} tooltipOn="bottom"
-                                   tooltipText="Go to main Menu">Menu</NavButton>
-                        <Container>
-                            <div className="navbar-title"> {nav.title}</div>
-                        </Container>
-
-                        <NavIcon dispatch={dispatch}
-                                 action={(dispatch) => dispatch(actionGotoPrevious())} tooltipOn="bottom"
-                                 tooltipText="Go back" enabled={nav.backEnabled}><ArrowReturnLeft/></NavIcon>
-                    </Navbar>
-
-                    <div className="navigation-content">
-                        {children}
-                    </div>
-
-                    <Navbar bg="dark" variant="dark" sticky="bottom">
-
-                        <NavIcon dispatch={dispatch} tooltipOn="right" tooltipText="About">
-                            <OverlayTrigger trigger="click" placement="top" overlay={aboutPopover}>
-                                <Info/>
-                            </OverlayTrigger>
-                        </NavIcon>
-                        <Container/>
-
-                        <NavIcon dispatch={dispatch}
-                                 action={(dispatch) => dispatch(actionGotoPage(PAGES.MESSAGES))} tooltipOn="top"
-                                 tooltipText="Messages"><JustifyLeft/></NavIcon>
-                    </Navbar>
-                </div>
-            </Container>
-        )
-    }
-}
-
+// ################### ACTIONS ###################
 export const actionNavigationBack = (backEnabled) => ({
     type: Actions.NAVIGATION_ENABLE_BACK,
     backEnabled
@@ -77,7 +20,9 @@ export const actionNavigationTitle = (title, backEnabled = true) => ({
     type: Actions.NAVIGATION_SET_TITLE,
     title
 })
+// ################### ACTIONS ###################
 
+// ################### REDUCER ###################
 export const reducer = (state = [], action) => {
     let newState = state;
     switch (action.type) {
@@ -96,12 +41,63 @@ export const reducer = (state = [], action) => {
     }
     return newState;
 }
+// ################### REDUCER ###################
 
-const NavIcon = ({dispatch, children, action, tooltipOn = "top", tooltipText = "", enabled = true}) =>
-    <NavButton dispatch={dispatch} children={children} action={action}
-               tooltipOn={tooltipOn} tooltipText={tooltipText} enabled={enabled}/>
+const aboutPopover = (
+    <Popover>
+        <Popover.Title as="h3">DOOM by Maciej Miklas</Popover.Title>
+        <Popover.Content>
+            Implemented in React/Redux on Apache 2.0 Open Source License
+        </Popover.Content>
+    </Popover>
+);
 
-const NavButton = ({dispatch, children, action, className = "", tooltipOn = "top", tooltipText = "", enabled = true}) =>
+class NavigationTag extends Component {
+
+    constructor(props) {
+        super(props);
+        this.props.clearTitle()
+    }
+
+    render() {
+        const {nav, children, goToMenu, goToPrevious, goToMessages} = this.props;
+        return (
+            <Container>
+                <div className="navigation">
+                    <Navbar bg="dark">
+                        <NavButton onClick={goToMenu} tooltipOn="bottom"
+                                   tooltipText="Go to main Menu">Menu</NavButton>
+                        <Container>
+                            <div className="navbar-title"> {nav.title}</div>
+                        </Container>
+
+                        <NavIcon onClick={goToPrevious} tooltipOn="bottom"
+                                 tooltipText="Go back" enabled={nav.backEnabled}><ArrowReturnLeft/></NavIcon>
+                    </Navbar>
+
+                    <div className="navigation-content">
+                        {children}
+                    </div>
+
+                    <Navbar bg="dark" variant="dark" sticky="bottom">
+                        <NavIcon tooltipOn="right" tooltipText="About">
+                            <OverlayTrigger trigger="click" placement="top" overlay={aboutPopover}>
+                                <Info/>
+                            </OverlayTrigger>
+                        </NavIcon>
+                        <Container/>
+                        <NavIcon onClick={goToMessages} tooltipOn="top" tooltipText="Messages"><JustifyLeft/></NavIcon>
+                    </Navbar>
+                </div>
+            </Container>
+        )
+    }
+}
+
+const NavIcon = ({children, onClick, tooltipOn = "top", tooltipText = "", enabled = true}) =>
+    <NavButton children={children} onClick={onClick} tooltipOn={tooltipOn} tooltipText={tooltipText} enabled={enabled}/>
+
+const NavButton = ({children, onClick, className = "", tooltipOn = "top", tooltipText = "", enabled = true}) =>
     <OverlayTrigger
         placement={tooltipOn}
         overlay={
@@ -110,10 +106,16 @@ const NavButton = ({dispatch, children, action, className = "", tooltipOn = "top
             </Tooltip>
         }
     >
-        <Button onClick={() => action(dispatch)} variant="outline-secondary"
+        <Button onClick={onClick} variant="outline-secondary"
                 className={`${className} navbarButton`} hidden={!enabled}>{children}
         </Button>
     </OverlayTrigger>
 
-
-export const Navigation = connect(state => ({nav: {...state.navigation}}))(NavigationTag)
+const stateToProps = state => ({nav: {...state.navigation}});
+const dispatchToProps = dispatch => ({
+    goToMenu: () => dispatch(actionGotoPage(PAGES.MENU)),
+    goToPrevious: () => dispatch(actionGotoPrevious()),
+    goToMessages: () => dispatch(actionGotoPage(PAGES.MESSAGES)),
+    clearTitle: () => dispatch(actionNavigationTitle(""))
+})
+export const Navigation = connect(stateToProps, dispatchToProps)(NavigationTag)

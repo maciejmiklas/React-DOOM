@@ -8,6 +8,34 @@ import Col from "react-bootstrap/Col";
 import PropTypes from 'prop-types';
 import Actions from "../store/Actions";
 
+// ################### ACTIONS ###################
+export const actionWadRename = (oldName, newName) => ({
+    type: Actions.WAD_RENAME,
+    oldName,
+    newName
+})
+// ################### ACTIONS ###################
+
+// ################### REDUCER ###################
+export const reducer = (state = [], action) => {
+    let newState = state;
+    switch (action.type) {
+        case Actions.WAD_RENAME:
+            const {oldName, newName} = action;
+            newState = {
+                ...state,
+                files: [
+                    {...state.files.find(wad => wad.name === oldName), name: newName},
+                    ...state.files.filter(wad => wad.name !== oldName)
+                ]
+            }
+            break;
+    }
+    return newState;
+}
+
+// ################### REDUCER ###################
+
 class Input extends Component {
 
     constructor(props) {
@@ -116,23 +144,6 @@ EditWadTag.propTypes = {
     wadName: PropTypes.string,
 };
 
-export const reducer = (state = [], action) => {
-    let newState = state;
-    switch (action.type) {
-        case Actions.WAD_RENAME:
-            const {oldName, newName} = action;
-            newState = {
-                ...state,
-                files: [
-                    {...state.files.find(wad => wad.name === oldName), name: newName},
-                    ...state.files.filter(wad => wad.name !== oldName)
-                ]
-            }
-            break;
-    }
-    return newState;
-}
-
 const validateWadName = (allWadNames, editingName) => newName => {
     if (editingName === newName) {
         return;
@@ -142,27 +153,19 @@ const validateWadName = (allWadNames, editingName) => newName => {
     }
 }
 
-const prepState = (state, wadName) => {
+const stateToProps = (state, wadName) => {
     const wads = {...state.wads};
     const wadNameStr = wadName.wadName;
     return {
         wad: wads.files.find(w => w.name === wadNameStr),
         validateWadName: validateWadName(wads.files.map(w => w.name), wadNameStr)
     }
-}
-
-const prepDispatch = (dispatch, wadName) => {
+};
+const dispatchToProps = (dispatch, wadName) => {
     const wadNameStr = wadName.wadName;
     return {
         updateTitle: () => dispatch(actionNavigationTitle(wadNameStr)),
         handleNameChange: (oldName, newName) => dispatch(actionWadRename(oldName, newName))
     }
-}
-
-export const actionWadRename = (oldName, newName) => ({
-    type: Actions.WAD_RENAME,
-    oldName,
-    newName
-})
-
-export const EditWad = connect(prepState, prepDispatch)(EditWadTag);
+};
+export const EditWad = connect(stateToProps, dispatchToProps)(EditWadTag);

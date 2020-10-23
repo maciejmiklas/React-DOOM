@@ -4,20 +4,16 @@ import React, {Component} from "react";
 import {actionNavigationTitle, Navigation} from "./Navigation";
 import Table from "react-bootstrap/Table";
 import {connect} from "react-redux";
+import * as R from "ramda";
 
+// ################### ACTIONS ###################
 export const actionSendMsg = (msg) => ({
     type: Actions.MESSAGES_SEND,
     msg
 })
+// ################### ACTIONS ###################
 
-const msg = (state, msg) => [
-    ...state.slice(0, 500),
-    {
-        time: moment().format('YYYY-MM-DD h:mm:ss '),
-        msg: msg
-    }
-]
-
+// ################### REDUCER ###################
 export const reducer = (state = [], action) => {
     let newState = state;
     switch (action.type) {
@@ -48,6 +44,15 @@ export const reducer = (state = [], action) => {
     }
     return newState;
 }
+// ################### REDUCER ###################
+
+const msg = (state, msg) => [
+    ...state.slice(0, 500),
+    {
+        time: moment().format('YYYY-MM-DD h:mm:ss '),
+        msg: msg
+    }
+]
 
 class MessagesListTag extends Component {
     constructor(pros) {
@@ -74,6 +79,4 @@ class MessagesListTag extends Component {
         </Navigation>)
     }
 }
-
-
 export const MessageList = connect(state => ({messages: [...state.messages]}))(MessagesListTag)

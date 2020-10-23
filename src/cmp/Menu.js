@@ -1,7 +1,6 @@
 import React from "react";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
-import PropTypes from 'prop-types';
 import {Navigation} from "./Navigation";
 import {connect} from "react-redux";
 import {actionGotoPage, PAGES} from "./Router";
@@ -19,80 +18,18 @@ const EL_GRAPHICS = "GRAPHICS";
 const EL_SOUND = "SOUND";
 const EL_STORAGE = "STORAGE";
 
-const menuElements = new Map();
+// ################### ACTIONS ###################
 
-menuElements.set(EL_CONTINUE_PLAYING, {
-    action: (dispatch) => dispatch(actionGotoPage(PAGES.PLAY_PAGE)),
-    title: "CONTINUE PLAYING"
-});
+// ################### ACTIONS ###################
 
-menuElements.set(EL_LOAD_FREE_WAD, {
-    action: (dispatch) => console.log("LOAD FREE WAD"),
-    title: "LOAD FREE WAD"
-});
-
-menuElements.set(EL_LOAD_GAME, {
-    action: (dispatch) => console.log("LOAD GAME"),
-    title: "LOAD GAME"
-});
-
-menuElements.set(EL_SAVE_GAME, {
-    action: (dispatch) => console.log("SAVE GAME"),
-    title: "SAVE GAME"
-});
-
-menuElements.set(EL_QUICK_SAVE, {
-    action: (dispatch) => console.log("QUICK SAVE"),
-    title: "QUICK SAVE"
-});
-
-menuElements.set(EL_MANAGE_WADS, {
-    action: (dispatch) => dispatch(actionGotoPage(PAGES.WAD_MANAGE)),
-    title: "MANAGE WADS"
-});
-
-menuElements.set(EL_UPLOAD_WADS, {
-    action: (dispatch) => dispatch(actionGotoPage(PAGES.WAD_UPLOAD)),
-    title: "UPLOAD WADS"
-});
-
-menuElements.set(EL_CONTROLS, {
-    action: (dispatch) => console.log("CONTROLS"),
-    title: "CONTROLS"
-});
-
-menuElements.set(EL_GRAPHICS, {
-    action: (dispatch) => console.log("GRAPHICS"),
-    title: "GRAPHICS"
-});
-
-menuElements.set(EL_SOUND, {
-    action: (dispatch) => console.log("SOUND"),
-    title: "SOUND"
-});
-
-menuElements.set(EL_STORAGE, {
-    action: (dispatch) => dispatch(actionGotoPage(PAGES.STORAGE)),
-    title: "STORAGE"
-});
-
-function visible(menu, name) {
-    return menu.visible.includes(name);
-}
-
-function Menu({dispatch, menu}) {
-    return (
-        <Navigation>
-            <Row className="menu">
-                <div className="btn-group-vertical">
-                    {[...menuElements.keys()].map(key =>
-                        <MenuButton visible={visible(menu, key)} action={() => menuElements.get(key).action(dispatch)}
-                                    key={key}>{menuElements.get(key).title}</MenuButton>
-                    )}
-                </div>
-            </Row>
-        </Navigation>
-    )
+// ################### REDUCER ###################
+export const reducer = (state = [], action) => {
+    let newState = state;
+    switch (action.type) {
+        case Actions.WAD_UPLOAD:
+            newState = addMenuElement(state, EL_MANAGE_WADS);
+    }
+    return newState;
 }
 
 const addMenuElement = (state, element) => {
@@ -105,28 +42,89 @@ const addMenuElement = (state, element) => {
     }
     return newState;
 }
+// ################### REDUCER ###################
 
-export const reducer = (state = [], action) => {
-    let newState = state;
-    switch (action.type) {
-        case Actions.WAD_UPLOAD:
-            newState = addMenuElement(state, EL_MANAGE_WADS);
-    }
-    return newState;
+const menuElements = new Map();
+
+menuElements.set(EL_CONTINUE_PLAYING, {
+    action: () => actionGotoPage(PAGES.PLAY_PAGE),
+    title: "CONTINUE PLAYING"
+});
+
+menuElements.set(EL_LOAD_FREE_WAD, {
+    action: () => ({}),
+    title: "LOAD FREE WAD"
+});
+
+menuElements.set(EL_LOAD_GAME, {
+    action: () => ({}),
+    title: "LOAD GAME"
+});
+
+menuElements.set(EL_SAVE_GAME, {
+    action: () => ({}),
+    title: "SAVE GAME"
+});
+
+menuElements.set(EL_QUICK_SAVE, {
+    action: () => ({}),
+    title: "QUICK SAVE"
+});
+
+menuElements.set(EL_MANAGE_WADS, {
+    action: () => actionGotoPage(PAGES.WAD_MANAGE),
+    title: "MANAGE WADS"
+});
+
+menuElements.set(EL_UPLOAD_WADS, {
+    action: () => actionGotoPage(PAGES.WAD_UPLOAD),
+    title: "UPLOAD WADS"
+});
+
+menuElements.set(EL_CONTROLS, {
+    action: () => ({}),
+    title: "CONTROLS"
+});
+
+menuElements.set(EL_GRAPHICS, {
+    action: () => ({}),
+    title: "GRAPHICS"
+});
+
+menuElements.set(EL_SOUND, {
+    action: () => ({}),
+    title: "SOUND"
+});
+
+menuElements.set(EL_STORAGE, {
+    action: () => actionGotoPage(PAGES.STORAGE),
+    title: "STORAGE"
+});
+
+function visible(menu, name) {
+    return menu.visible.includes(name);
 }
 
-const MenuButton = (props) => {
-    if (props.visible) {
-        return <Button onClick={props.action} className="btn-nav-primary">{props.children}</Button>
-    } else {
-        return <></>
-    }
+function Menu({menu, goto}) {
+    return (
+        <Navigation>
+            <Row className="menu">
+                <div className="btn-group-vertical">
+                    {[...menuElements.keys()].map(key =>
+                        <MenuButton visible={visible(menu, key)} action={() => goto(key)}
+                                    key={key}>{menuElements.get(key).title}</MenuButton>
+                    )}
+                </div>
+            </Row>
+        </Navigation>
+    )
 }
 
-MenuButton.propTypes = {
-    to: PropTypes.string,
-    msg: PropTypes.string,
-    visible: PropTypes.bool
-}
+const MenuButton = (props) => props.visible ?
+    <Button onClick={props.action} className="btn-nav-primary">{props.children}</Button> : null
 
-export default connect(state => ({menu: {...state.menu}}))(Menu);
+const stateToProps = state => ({menu: {...state.menu}});
+const dispatchToProps = dispatch => ({
+    goto: key => dispatch(menuElements.get(key).action())
+});
+export default connect(stateToProps, dispatchToProps)(Menu);

@@ -1,12 +1,12 @@
 export const initial = {
     router: {
         active: {
-            name: "WAD_MANAGE",
-            props: {}
+            pageName: "MENU",
+            pageProps: {}
         },
         previous: {
-            name: "MENU",
-            props: {},
+            pageName: "MENU",
+            pageProps: {},
         }
     },
     menu: {
