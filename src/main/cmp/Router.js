@@ -5,7 +5,6 @@ import Menu from "./Menu";
 import {ManageWads} from "./ManageWads";
 import {EditWad} from "./EditWad";
 import {UploadWads} from "./UploadWads";
-import * as R from "ramda";
 import PropTypes from "prop-types";
 import Actions from "../store/Actions";
 import {MessageList} from "./Messages";

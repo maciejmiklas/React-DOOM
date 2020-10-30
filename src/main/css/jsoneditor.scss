@@ -8,12 +8,12 @@
 }
 
 .jsoneditor-navigation-bar {
-  background-color: $dialog-color !important;
+  background-color: $dialog-bg-color !important;
   color: $font-color !important;
 }
 
 div.jsoneditor-tree button.jsoneditor-button:focus {
-  background: $dialog-color !important;
+  background: $dialog-bg-color !important;
 }
 
 .jsoneditor {
@@ -29,6 +29,6 @@ div.jsoneditor-tree button.jsoneditor-button:focus {
 }
 
 .jsoneditor-menu {
-  background-color: $dialog-color !important;
+  background-color: $dialog-bg-color !important;
   border-bottom: 1px solid $navbar-border-color !important;
 }

@@ -1,18 +1,24 @@
 @import "variables";
 
 $btn-padding-x: 33px;
-$dark: $dialog-color;
-$primary: $menu-bg;
+$primary: $dialog-bg-tr-color;
 
 $input-bg: $input-active-bg;
 $input-disabled-bg: $input-inactive-bg;
-$input-color:$input-font-color;
+$input-color: $input-font-color;
 
-$modal-content-bg: $dialog-color;
+$modal-content-bg: $dialog-bg-color;
 $modal-content-color: $font-color;
 $modal-content-border-color: $font-color;
 $modal-header-border-color: $font-color;
+
 $close-color: $font-color;
+
+$list-group-border-color: $dialog-border-color;
+
+$list-group-action-hover-color: $dialog-bg-hover-color;
+$list-group-hover-bg: $dialog-bg-hover-bg-color;
+
 
 // #############################################
 @import "~bootstrap/scss/bootstrap";
@@ -30,13 +36,22 @@ $close-color: $font-color;
 @each $variant, $color in $theme-colors {
   .btn-nav-#{$variant} {
     @extend .btn;
-    @include button-variant($color, $menu-button-border);
+    @include button-variant($color, $dialog-border-color);
     font-size: xx-large;
     color: $font-color;
 
     @include hover() {
-      color: $font-color;
-      @include gradient-bg(darken($color, 100%));
+      color: $dialog-bg-hover-color;
+      background-color: $dialog-bg-hover-bg-color;
     }
   }
+}
+
+.list-group-item-dark {
+  color: $font-color;
+  background-color: $dialog-bg-tr-color;
+}
+
+.invalid-feedback {
+  color: $error-color;
 }

@@ -46,14 +46,14 @@ class StorageTag extends Component {
     render() {
         return (
             <Navigation>
-                <Card bg="dark">
+                <Card bg="card">
                     <Card.Body>
                         <SButton title="Download Storage" onClick={this.downloadStorage}/>&nbsp;
                         <SButton title="Upload Storage" disabled={true}/>
                     </Card.Body>
                 </Card>
                 <div className="card-separator"/>
-                <Card bg="dark">
+                <Card bg="card">
                     <Card.Body>
                         <JsonEditor value={this.props.root} mode="view" name="Storage Content"/>
                     </Card.Body>

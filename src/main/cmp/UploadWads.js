@@ -80,7 +80,7 @@ class UploadWadsTag extends Component {
         const upload = uploadFile(wads, uploadNew, uploadExisting);
         return (
             <Navigation>
-                <Card bg="dark">
+                <Card bg="card-tr">
                     <Card.Body>
                         <FileUploader callback={upload}/>
                     </Card.Body>

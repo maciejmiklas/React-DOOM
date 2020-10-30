@@ -45,8 +45,7 @@
     "brace": "latest",
     "ace": "latest",
     "ramda": "latest",
-    "ramda-fantasy": "latest",
-    "lodash": "latest"
+    "ramda-fantasy": "latest"
   },
   "scripts": {
     "build": "webpack --mode development",

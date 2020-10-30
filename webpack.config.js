@@ -5,8 +5,8 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        react_doom: "./src/react_doom.js",
-        test: "./src/test.js"
+        react_doom: "./src/main/react_doom.js",
+        test: "./src/test/test.js"
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -79,7 +79,7 @@ module.exports = {
 
         new HtmlWebpackPlugin({
             title: 'React DOOM',
-            template: './src/index.html',
+            template: './src/main/index.html',
             chunks: ['react_doom']
         }),
 

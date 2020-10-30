@@ -51,8 +51,8 @@
 }
 
 .navigation {
- // @extend .crt;
-  background-color: $screen-background;
+  // @extend .crt;
+  background-color: $screen-gb-color;
 }
 
 .json-editor {
@@ -80,14 +80,30 @@
 }
 
 .main-container {
-  background-color: $screen-background;
+  background-color: $screen-gb-color;
   color: $font-color;
   text-align: center;
 }
 
 .uploadDropzone {
   min-height: 600px;
-  color: $screen-background;
+  color: $screen-gb-color;
   background: url("img/floppy_disc.png") no-repeat center;
 }
 
+.bg-card {
+  background-color: $dialog-bg-tr-color !important;
+}
+
+.bg-card-tr {
+  background-color: transparent !important;
+}
+
+.bg-nav {
+  background-color: $nav-bg-color;
+}
+
+.list-group-item-transparent {
+  background-color: $dialog-bg-tr-color;
+  color: $font-color;
+}

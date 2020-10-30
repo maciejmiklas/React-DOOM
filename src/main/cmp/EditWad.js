@@ -113,10 +113,10 @@ class EditWadTag extends Component {
         const {wad, validateWadName, handleNameChange} = this.props
         return (
             <Navigation>
-                <Card bg="dark">
-                    <Card.Body>
-                        <div className="row">
-                            <div className="col-md-6 offset-md-3">
+                <Row>
+                    <Col md={{span: 6, offset: 3}}>
+                        <Card bg="card">
+                            <Card.Body>
                                 <Form noValidate>
                                     <Input name="Name" value={wad.name} onChange={handleNameChange}
                                            validate={validateWadName}/>
@@ -127,10 +127,10 @@ class EditWadTag extends Component {
                                     <Input name="Longest Session" value={wad.stats.longestSessionMs}/>
                                     <Input name="Last Session" value={wad.stats.lastSessionMs}/>
                                 </Form>
-                            </div>
-                        </div>
-                    </Card.Body>
-                </Card>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
             </Navigation>
         )
     }

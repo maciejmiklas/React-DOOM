@@ -63,32 +63,30 @@ class NavigationTag extends Component {
         const {nav, children, goToMenu, goToPrevious, goToMessages} = this.props;
         return (
             <Container>
-                <div className="navigation">
-                    <Navbar bg="dark">
-                        <NavButton onClick={goToMenu} tooltipOn="bottom"
-                                   tooltipText="Go to main Menu">Menu</NavButton>
-                        <Container>
-                            <div className="navbar-title"> {nav.title}</div>
-                        </Container>
+                <Navbar bg="nav">
+                    <NavButton onClick={goToMenu} tooltipOn="bottom"
+                               tooltipText="Go to main Menu">Menu</NavButton>
+                    <Container>
+                        <div className="navbar-title"> {nav.title}</div>
+                    </Container>
 
-                        <NavIcon onClick={goToPrevious} tooltipOn="bottom"
-                                 tooltipText="Go back" enabled={nav.backEnabled}><ArrowReturnLeft/></NavIcon>
-                    </Navbar>
+                    <NavIcon onClick={goToPrevious} tooltipOn="bottom"
+                             tooltipText="Go back" enabled={nav.backEnabled}><ArrowReturnLeft/></NavIcon>
+                </Navbar>
 
-                    <div className="navigation-content">
-                        {children}
-                    </div>
-
-                    <Navbar bg="dark" variant="dark" sticky="bottom">
-                        <NavIcon tooltipOn="right" tooltipText="About">
-                            <OverlayTrigger trigger="click" placement="top" overlay={aboutPopover}>
-                                <Info/>
-                            </OverlayTrigger>
-                        </NavIcon>
-                        <Container/>
-                        <NavIcon onClick={goToMessages} tooltipOn="top" tooltipText="Messages"><JustifyLeft/></NavIcon>
-                    </Navbar>
+                <div className="navigation-content">
+                    {children}
                 </div>
+
+                <Navbar bg="nav" variant="dark" sticky="bottom">
+                    <NavIcon tooltipOn="right" tooltipText="About">
+                        <OverlayTrigger trigger="click" placement="top" overlay={aboutPopover}>
+                            <Info/>
+                        </OverlayTrigger>
+                    </NavIcon>
+                    <Container/>
+                    <NavIcon onClick={goToMessages} tooltipOn="top" tooltipText="Messages"><JustifyLeft/></NavIcon>
+                </Navbar>
             </Container>
         )
     }

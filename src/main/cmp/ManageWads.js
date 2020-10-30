@@ -33,12 +33,12 @@ class ManageWadsTag extends Component {
         const {wads, editWad} = this.props;
         return (
             <Navigation>
-                <Card bg="dark">
+                <Card bg="card-tr">
                     <Card.Body>
                         <ListGroup className="wads-list" as={Row}>
                             {wads.map(wad =>
                                 <Col sm={4} key={wad.name}>
-                                    <ListGroup.Item action variant="dark" onClick={() => editWad(wad.name)}>
+                                    <ListGroup.Item action variant="transparent" onClick={() => editWad(wad.name)}>
                                         {wad.name}
                                     </ListGroup.Item>
                                 </Col>
