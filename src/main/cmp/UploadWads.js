@@ -104,7 +104,7 @@ const normalizeWadName = (fileName) => fileName.split('.')[0];
 
 const createWad = (fileName, content) => ({
     name: normalizeWadName(fileName),
-    content: WadReader.parse(content),
+    content: "TODO: WadParser.parse(content)",
     uploadTime: new Date(),
     lastPlayed: 0,
     saves: [],

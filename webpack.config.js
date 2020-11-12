@@ -5,8 +5,7 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        react_doom: "./src/main/react_doom.js",
-        test: "./src/test/test.js"
+        react_doom: "./src/main/react_doom.js"
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -17,9 +16,18 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.js$/,
-                exclude: /(node_modules)/,
-                loader: ['babel-loader']
+                test: /\.(ts|js)x?$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: [
+                            "@babel/preset-env",
+                            "@babel/preset-react",
+                            "@babel/preset-typescript"
+                        ],
+                    },
+                }
             },
 
             // In order to use extracted CSS:
@@ -88,4 +96,9 @@ module.exports = {
             chunkFilename: '[id].css',
         }),
     ],
+    devServer: {
+        contentBase: path.join(__dirname, "dist"),
+        compress: true,
+        port: 4000,
+    },
 };
