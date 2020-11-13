@@ -40,5 +40,19 @@ describe("parseStr", () => {
     test("out of range", () => {
         expect(tf.parseStr(6, 2)(iwad)).toEqual("")
     });
+});
 
+describe("parseHeadType", () => {
+    test("IWAD", () => {
+        expect(tf.parseHeadType(iwad)).toEqual("IWAD")
+    });
+});
+
+describe("parseHeader", () => {
+    test("IWAD", () => {
+        const header = tf.parseHeader(wadBytes);
+        expect(header.identification).toEqual("IWAD")
+        expect(header.numlumps).toEqual(1241)
+        expect(header.infotableofs).toEqual(4205648)
+    });
 });

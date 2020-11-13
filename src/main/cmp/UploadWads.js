@@ -5,7 +5,6 @@ import Card from "react-bootstrap/Card";
 import {connect} from "react-redux";
 import {actionShowOverwrite, ConfirmStore} from "./ConfirmStore";
 import Actions from "../store/Actions";
-import {WadReader} from "../wad/WadReader";
 import * as R from "ramda"
 
 // ################### ACTIONS ###################
