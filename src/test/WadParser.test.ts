@@ -1,7 +1,6 @@
 import {Directory, Header, MapLumpName, testFunctions as tf, WadType} from "../main/wad/WadParser";
 import {base64ToUint8Array} from "../main/util"
 import jsonData from "./data/doom.json"
-import * as S from 'sanctuary-either';
 
 // @ts-ignore
 const WAD_BYTES = base64ToUint8Array(jsonData.doom)
@@ -123,7 +122,7 @@ describe("findNextMapDir", () => {
     const nextDir = tf.findNextMapDir(dirs);
 
     test("E1M1", () => {
-        const mapDir = S.formatRight(nextDir(0))
+        const mapDir = nextDir(0)
         expect(mapDir.name).toEqual("E1M1")
     })
 

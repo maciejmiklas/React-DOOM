@@ -1,5 +1,4 @@
 import * as R from "ramda";
-import * as S from 'sanctuary-either';
 
 const trim0Padding = (bytes: number[], pos: number) =>
     R.until((v: number) => bytes[v] !== 0, (v: number) => v - 1)(pos) + 1
@@ -35,10 +34,8 @@ const isMapName = (name: string): boolean => {
 }
 
 /** Finds next map in directory */
-const findNextMapDir = (dirs: Directory[]) => (offset: number): Directory => {
-    const found = dirs.find(d => d.idx >= offset && isMapName(d.name))
-    return found == null ? S.Lefta("ups...") : S.Right(found);
-}
+const findNextMapDir = (dirs: Directory[]) => (offset: number): Directory =>
+   dirs.find(d => d.idx >= offset && isMapName(d.name))
 
 const parseThings = (dirs: Directory[]) => (mapIdx: number): Things => {
     return null;

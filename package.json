@@ -22,7 +22,6 @@
     "reduce-reducers": "^1.0.4",
     "redux": "^4.0.5",
     "redux-form": "^8.3.6",
-    "sanctuary-either": "^2.1.0",
     "uuid": "^8.3.1"
   },
   "devDependencies": {
