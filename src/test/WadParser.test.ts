@@ -1,6 +1,8 @@
-import {Directory, Header, MapLumpName, testFunctions as tf, WadType} from "../main/wad/WadParser";
+import {testFunctions as tf} from "../main/wad/WadParser";
+import {Directory, Header, MapLumpName, Thing, WadType} from "../main/wad/WadModel";
 import {base64ToUint8Array} from "../main/util"
 import jsonData from "./data/doom.json"
+import {Either} from "../main/Either";
 
 // @ts-ignore
 const WAD_BYTES = base64ToUint8Array(jsonData.doom)
@@ -42,45 +44,48 @@ const FD_E1M2: Directory = {
     idx: 17
 }
 
-describe("parseInt", () => {
+const HEADER: Either<Header> = tf.parseHeader(WAD_BYTES);
+const ALL_DIRS: Either<Directory[]> = HEADER.map(header => tf.parseAllDirectories(header, WAD_BYTES))
+
+describe("Parse Int", () => {
     test("12", () => {
-        expect(tf.parseInt(0)([0x0C, 0x00, 0x00, 0x00])).toEqual(12)
+        expect(tf.parseInt([0x0C, 0x00, 0x00, 0x00])(0)).toEqual(12)
     });
 
     test("12 offset", () => {
-        expect(tf.parseInt(2)([0xFF, 0xFF, 0x0C, 0x00, 0x00, 0x00, 0xFF])).toEqual(12)
+        expect(tf.parseInt([0xFF, 0xFF, 0x0C, 0x00, 0x00, 0x00, 0xFF])(2)).toEqual(12)
     });
 
     test("1234567898", () => {
-        expect(tf.parseInt(0)([0xDA, 0x02, 0x96, 0x49])).toEqual(1234567898)
+        expect(tf.parseInt([0xDA, 0x02, 0x96, 0x49])(0)).toEqual(1234567898)
     });
 
     test("-999912", () => {
-        expect(tf.parseInt(0)([0x18, 0xBE, 0xF0, 0xFF])).toEqual(-999912)
+        expect(tf.parseInt([0x18, 0xBE, 0xF0, 0xFF])(0)).toEqual(-999912)
     });
 });
 
-describe("parseStr", () => {
+describe("Parse Str", () => {
     test("whole", () => {
-        expect(tf.parseStr(0, 4)(IWAD_STR)).toEqual("IWAD")
+        expect(tf.parseStr(IWAD_STR)(0, 4)).toEqual("IWAD")
     });
 
     test("sub string", () => {
-        expect(tf.parseStr(1, 2)(IWAD_STR)).toEqual("WA")
+        expect(tf.parseStr(IWAD_STR)(1, 2)).toEqual("WA")
     });
 
     test("length out of range", () => {
-        expect(tf.parseStr(0, 5)(IWAD_STR)).toEqual("IWAD")
+        expect(tf.parseStr(IWAD_STR)(0, 5)).toEqual("IWAD")
     });
 
     test("out of range", () => {
-        expect(tf.parseStr(6, 2)(IWAD_STR)).toEqual("")
+        expect(tf.parseStr(IWAD_STR)(6, 2)).toEqual("")
     });
 });
 
-describe("parseHeader", () => {
+describe("Parse Header", () => {
     test("IWAD", () => {
-        const header = tf.parseHeader(WAD_BYTES);
+        const header = HEADER.get();
         expect(header.identification).toEqual(WadType.IWAD)
         expect(header.numlumps).toEqual(1241)
         expect(header.infotableofs).toEqual(4205648)
@@ -99,10 +104,35 @@ const validateDir = (header: Header) => (nr: number, given: Directory) => {
     eqDir(dir, given);
 }
 
-describe("parseMapDirectory", () => {
-    const header = tf.parseHeader(WAD_BYTES);
+describe("Find Map Directory", () => {
+    const header = HEADER.get();
     const validate = validateDir(header);
 
+    test("First MAP", () => {
+        validate(FIRST_MAP_DIR_OFFSET, FD_E1M1)
+    });
+
+    test("Second MAP", () => {
+        validate(FIRST_MAP_DIR_OFFSET + MapLumpName.BLOCKMAP + 2, FD_E1M2)
+    });
+})
+
+describe("Parse Thing", () => {
+    const firstMap: Directory = ALL_DIRS.map(dirs => tf.findNextMapDir(dirs)).get()(0).get();
+    expect(firstMap.name).toEqual("E1M1")
+    const things = ALL_DIRS.get()[firstMap.idx + 1]
+    expect(things.name).toEqual("THINGS")
+   // const parser = tf.parseThing(things);
+
+    test("first found", () => {
+       // const thing: Either<Thing> = parser(0);
+       // expect(thing.isRight()).toBeTruthy()
+    })
+
+})
+
+describe("Parse Map Directory", () => {
+    const validate = HEADER.map(v => validateDir(v)).get()
     test("First MAP - THINGS", () => {
         validate(FIRST_MAP_DIR_OFFSET + 1 + MapLumpName.THINGS, E1M1_THINGS)
     })
@@ -116,30 +146,35 @@ describe("parseMapDirectory", () => {
     })
 })
 
-describe("findNextMapDir", () => {
-    const header = tf.parseHeader(WAD_BYTES);
-    const dirs = tf.parseAllDirectories(header, WAD_BYTES);
-    const nextDir = tf.findNextMapDir(dirs);
+describe("Find Next Map Dir", () => {
+    const nextDirEi = ALL_DIRS.map(dirs => tf.findNextMapDir(dirs));
+    expect(nextDirEi.isRight).toBeTruthy()
+    const nextDir = nextDirEi.get()
 
     test("E1M1", () => {
-        const mapDir = nextDir(0)
+        const mapDir = nextDir(0).get()
         expect(mapDir.name).toEqual("E1M1")
     })
 
     test("E1M2", () => {
-        const mapDir = nextDir(17)
+        const mapDir = nextDir(17).get()
         expect(mapDir.name).toEqual("E1M2")
     })
 
     test("E1M9", () => {
-        const mapDir = nextDir(90)
+        const mapDir = nextDir(90).get()
         expect(mapDir.name).toEqual("E1M9")
+    })
+
+    test("Not found", () => {
+        const mapDir = nextDir(9000)
+        expect(mapDir.isLeft()).toBeTruthy()
     })
 
     test("loop", () => {
         let offs = 0;
         for (let i = 0; i < 8; i++) {
-            const mapDir = nextDir(offs)
+            const mapDir = nextDir(offs).get()
             expect(mapDir.name).toEqual("E1M" + (i + 1))
             offs = mapDir.idx + 1
         }
@@ -147,7 +182,7 @@ describe("findNextMapDir", () => {
 
 })
 
-describe("isMapName", () => {
+describe("Is Map Name", () => {
 
     test("MAPxx", () => {
         expect(tf.isMapName("MAP01")).toBe(true)
@@ -172,24 +207,11 @@ describe("isMapName", () => {
 
 })
 
-describe("parseFreeDirectory", () => {
-    const header = tf.parseHeader(WAD_BYTES);
-    const validate = validateDir(header);
-
-    test("First MAP", () => {
-        validate(FIRST_MAP_DIR_OFFSET, FD_E1M1)
-    });
-
-    test("Second MAP", () => {
-        validate(FIRST_MAP_DIR_OFFSET + MapLumpName.BLOCKMAP + 2, FD_E1M2)
-    });
-})
-
 const findDirectory = (dir: Directory, dirs: Directory[]) =>
     dirs.find(d => (d.name === dir.name && d.filepos === dir.filepos && d.size == dir.size))
 
-describe("parseAllDirectories", () => {
-    const header = tf.parseHeader(WAD_BYTES);
+describe("Parse All Directories", () => {
+    const header = HEADER.get();
     const allDirs = tf.parseAllDirectories(header, WAD_BYTES);
     const validate = (dir: Directory) => {
         const found = findDirectory(dir, allDirs)
