@@ -33,12 +33,16 @@ export abstract class Either<T> {
         return new Right<T>(val)
     }
 
+    static ofLeft<T>(msg: string): Left<T> {
+        return new Left(msg);
+    }
+
     static ofNullable<T>(val: T, msg: () => string): Left<T> | Right<T> {
         return R.isNil(val) ? new Left(msg()) : new Right<T>(val)
     }
 
-    static ofCondition<T>(cnd: () => boolean, supplier: () => T, msg: () => string): Left<T> | Right<T> {
-        return cnd() ? new Right<T>(supplier()) : new Left(msg())
+    static ofCondition<T>(cnd: () => boolean, left: () => string, right: () => T): Left<T> | Right<T> {
+        return cnd() ? new Right<T>(right()) : new Left(left())
     }
 }
 
@@ -74,7 +78,7 @@ export class Left<T> extends Either<T> {
     }
 
     get(): T {
-        throw new TypeError("Left has not value: " + this.message())
+        throw new TypeError("Left has no value: " + this.message())
     }
 
     toString(): string {

@@ -24,12 +24,12 @@ export type Directory = {
     /** An integer representing the size of the lump in bytes. */
     size: number
 
-    /** An ASCII string defining the lump's name. */
+    /** An ASCII string defining the lump's type. */
     name: string
 }
 
-/** Those Lumps must follow in file immediately after map name, in exactly this order! */
-export enum MapLumpName {
+/** Those Lumps must follow in file immediately after map type, in exactly this order! */
+export enum LumpType {
     THINGS,
     LINEDEFS,
     SIDEDEFS,
@@ -44,12 +44,18 @@ export enum MapLumpName {
 
 /**
  * A lump is any section of data within the structure of a WAD file, or a file containing such a portion of a WAD file.
- * Each lump has a name (up to 8 characters), which is not necessarily unique. Lumps contain data such as:
+ * Each lump has a type (up to 8 characters), which is not necessarily unique. Lumps contain data such as:
  * Graphics, Sounds, Music, Demos, Sprites, Wall textures, Wall patches, Flats, Level maps and associated data
  */
-export type Lump =  {
+export type Lump = {
     dir: Directory
-    name: MapLumpName
+    type: LumpType
+}
+
+/** range from -32768 to +32767 */
+export type Position = {
+    x: number,
+    y: number
 }
 
 /**
@@ -61,19 +67,36 @@ export type Lump =  {
  * see: https://doomwiki.org/wiki/Thing
  */
 export type Thing = Lump & {
-    x: number,
-    y: number,
+    position: Position
     angleFacing: number,
     type: number,
     flags: number
 }
 
 /**
- * A list of linedefs, defined by their starting and ending vertices, flags, type, tag, and front and back
- * sidedefs (if any).
+ * Vertices are nothing more than coordinates on the map.
+ *
+ * @see https://doomwiki.org/wiki/Vertex
+ */
+export type Vertex = Position & {
+
+}
+
+/**
+ * Linedefs are what make up the 'shape' (for lack of a better word) of a map. Every linedef is between two vertices
+ * and contains one or two sidedefs (which contain wall texture data). There are two major purposes of linedefs.
+ * The first is to divide the map into sectors, and the second is to trigger action specials.
+ *
+ * @see https://doomwiki.org/wiki/Linedef
  */
 export type Linedef = Lump & {
-    xxx: number
+    start: Vertex,
+    end: Vertex,
+    flags: number,
+    specialType: number,
+    sectorTag: number,
+    frontSide: number,
+    backSide:number
 }
 
 /**
@@ -133,7 +156,7 @@ export type Blockmap = {
 
 /** All lumps from Map */
 export type MapLumps = {
-    /** The directory indication beginning of the map in the file. nameDir#name gives name of the map */
+    /** The directory indication beginning of the map in the file. nameDir#type gives type of the map */
     nameDir: Directory
     things: Thing[]
     linedefs: Linedef[]

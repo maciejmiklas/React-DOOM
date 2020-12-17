@@ -17,6 +17,28 @@ describe("Either.of", () => {
     })
 })
 
+describe("Either.ofLeft", () => {
+    const left = Either.ofLeft("123");
+
+    test("isLeft", () => {
+        expect(left.isLeft()).toBeTruthy()
+    })
+
+    test("isRight", () => {
+        expect(left.isRight()).toBeFalsy()
+    })
+
+    test("message", () => {
+        expect(left.message()).toBe("123");
+    })
+
+    test("map simple type", () => {
+        const ei = left.map(v => v + 1);
+        expect(left.isLeft()).toBeTruthy()
+        expect(ei.message()).toBe("123");
+    })
+})
+
 describe("Either.map", () => {
     const nil = Either.ofNullable(null, () => "just null!");
     const nn = Either.ofNullable(100, () => "test 100");
@@ -138,8 +160,8 @@ describe("Either.toString", () => {
 })
 
 describe("Either.ofCondition", () => {
-    const falsy = Either.ofCondition(() => false, () => 98, () => "cond false");
-    const truthy = Either.ofCondition(() => true, () => 99, () => "cond true");
+    const falsy = Either.ofCondition(() => false, () => "cond false", () => 98,);
+    const truthy = Either.ofCondition(() => true, () => "cond true", () => 99);
 
     test("falsy - isLeft", () => {
         expect(falsy.isLeft()).toBeTruthy()
