@@ -1,7 +1,7 @@
 import {Either} from '../main/Either'
 
 describe("Either.of", () => {
-    const str = Either.of("123");
+    const str = Either.ofRight("123");
     test("isLeft", () => {
         expect(str.isLeft()).toBeFalsy()
     })
@@ -11,7 +11,7 @@ describe("Either.of", () => {
     })
 
     test("map simple type", () => {
-        const ei = Either.of(10).map(v => v + 1);
+        const ei = Either.ofRight(10).map(v => v + 1);
         expect(ei.isRight()).toBeTruthy()
         expect(ei.get()).toBe(11);
     })
@@ -103,7 +103,7 @@ describe("Either.ofNullable", () => {
 
 describe("Either.orElse", () => {
     const nil = Either.ofNullable(null, () => "just null!");
-    const of = Either.of(101);
+    const of = Either.ofRight(101);
     const nn = Either.ofNullable(100, () => "test 100");
 
     test("from null", () => {
@@ -121,7 +121,7 @@ describe("Either.orElse", () => {
 
 describe("Either.orElseGet", () => {
     const nil = Either.ofNullable(null, () => "just null!");
-    const of = Either.of(101);
+    const of = Either.ofRight(101);
     const nn = Either.ofNullable(100, () => "test 100");
 
     test("from null", () => {
@@ -139,7 +139,7 @@ describe("Either.orElseGet", () => {
 
 describe("Either.toString", () => {
     const nil = Either.ofNullable(null, () => "just null!");
-    const of = Either.of(101);
+    const of = Either.ofRight(101);
     const nn = Either.ofNullable(100, () => "test 100");
 
     test("from null", () => {
@@ -159,8 +159,28 @@ describe("Either.toString", () => {
     })
 })
 
+
+describe("Either.ofTruth", () => {
+    const falsy1 = Either.ofCondition(() => false, () => "cond false 1", () => 98);
+    const falsy2 = Either.ofCondition(() => false, () => "cond false 2", () => 97);
+    const truthy1 = Either.ofCondition(() => true, () => "cond true", () => 99);
+    const truthy2 = Either.ofCondition(() => true, () => "cond true", () => 21);
+
+    test("Falsy", () => {
+        const val = Either.ofTruth([falsy1, falsy2, truthy1, truthy2], () => 101)
+        expect(val.isLeft()).toBeTruthy()
+        expect(val.message()).toEqual("cond false 1,cond false 2")
+    })
+
+    test("Truthy", () => {
+        const val = Either.ofTruth([truthy1, truthy2], () => 101)
+        expect(val.isRight()).toBeTruthy()
+        expect(val.get()).toEqual(101)
+    })
+})
+
 describe("Either.ofCondition", () => {
-    const falsy = Either.ofCondition(() => false, () => "cond false", () => 98,);
+    const falsy = Either.ofCondition(() => false, () => "cond false", () => 98);
     const truthy = Either.ofCondition(() => true, () => "cond true", () => 99);
 
     test("falsy - isLeft", () => {
@@ -199,7 +219,7 @@ describe("Either.ofCondition", () => {
 
 describe("Either.exec", () => {
     const nil = Either.ofNullable(null, () => "just null!");
-    const of = Either.of(101);
+    const of = Either.ofRight(101);
 
     test("from null", () => {
         expect(nil.exec((v) => {

@@ -1,53 +1,18 @@
 import * as R from "ramda";
 import {Either} from "../Either"
-import {Directory, Header, Linedef, LumpType, Thing, Vertex, WadType} from "./WadModel";
+import {Directory, Header, Linedef, MapLumpType, Sidedef, Thing, Vertex, WadType} from "./WadModel";
 import {Log} from "../Log";
-
-const trim0Padding = (bytes: number[], pos: number) =>
-    R.until((v: number) => bytes[v] !== 0, (v: number) => v - 1)(pos) + 1
-
-const parseStr = (bytes: number[]) => (pos: number, length: number): string =>
-    String.fromCharCode.apply(null, bytes.slice(pos, trim0Padding(bytes, pos + length - 1)))
-
-/** Converts given 4-byte array to number. Notation: little-endian (two's complement) */
-const parseNumber = (bytes: number[]) => (pos: number): number => {
-    return R.pipe<number[], number[], number[], number>(
-        R.slice(pos, pos + 4),
-        R.reverse,
-        R.curry(R.reduce)((val: number, cur: number) => val << 8 | cur, 0)
-    )(bytes)
-}
-
-/** little-endian 32bit signed (two's complement) int */
-const parseInt = (bytes: number[]) => (pos: number): number => parseNumber(bytes)(pos)
-
-const signedByte = (byte: number) => (byte & 0x80) === 0x80
-
-/** little-endian 16bit signed (two's complement) int */
-const parseShort = (bytes: number[]) => (pos: number): number => {
-    const padding = signedByte(bytes[pos + 1]) ? 0xFF : 0x00
-    return parseNumber([bytes[pos], bytes[pos + 1], padding, padding])(0)
-}
+import {util} from "../util";
 
 const parseHeader = (bytes: number[]): Either<Header> => {
-    const headerStr = parseStr(bytes)(0x00, 4)
-    const parseIntBytes = parseInt(bytes);
-    const header = {
-        // The ASCII characters "IWAD" or "PWAD".
-        identification: WadType[headerStr],
-
-        // An integer specifying the number of lumps in the WAD.
-        numlumps: parseIntBytes(0x04),
-
-        // An integer holding a pointer to the location of the directory.
-        infotableofs: parseIntBytes(0x08)
-    };
-
-    Log.debug("Parsed Header: %1", header)
-    return Either.ofCondition(
-        () => !R.isNil(header.identification) && header.identification === WadType.IWAD,
-        () => "Unsupported Header" + headerStr,
-        () => header)
+    const headerStr = util.parseStrOp(bytes)(s => s === "IWAD", (s) => "WAD type not supported: " + s)(0x00, 4)
+    const parseIntBytes = util.parseInt(bytes);
+    return Either.ofTruth([headerStr], () =>
+        ({
+            identification: headerStr.map(s => WadType[s]).get(),
+            numlumps: parseIntBytes(0x04),
+            infotableofs: parseIntBytes(0x08)
+        })).exec(h => Log.debug("Parsed Header: %1", h))
 }
 
 /** The type of the map has to be in the form ExMy or MAPxx */
@@ -56,15 +21,18 @@ const isMapName = (name: string): boolean => {
 }
 
 /** Finds next map in directory */
-const findNextMapDir = (dirs: Directory[]) => (offset: number): Either<Directory> =>
+const findNextMapStartDir = (dirs: Directory[]) => (offset: number): Either<Directory> =>
     Either.ofNullable(dirs.find(d => d.idx >= offset && isMapName(d.name)), () => "No Map-Directory on offset:" + offset)
 
-const parseThing = (bytes: number[], thingDir: Directory) => (thingIdx: number): Either<Thing> => {
-    const offset = thingDir.filepos + 10 * thingIdx;
-    const parseShortBytes = parseShort(bytes)
+const unfoldByDirectorySize = (dir: Directory, size: number): number[] =>
+    R.unfold((idx) => idx == dir.size / size ? false : [dir.filepos + idx * 10, idx + 1], 0)
+
+const parseThing = (bytes: number[], dir: Directory) => (thingIdx: number): Thing => {
+    const offset = dir.filepos + 10 * thingIdx;
+    const parseShortBytes = util.parseShort(bytes)
     const thing = {
-        dir: thingDir,
-        name: LumpType.THINGS,
+        dir: dir,
+        name: MapLumpType.THINGS,
         position: {
             x: parseShortBytes(offset),
             y: parseShortBytes(offset + 2),
@@ -76,52 +44,93 @@ const parseThing = (bytes: number[], thingDir: Directory) => (thingIdx: number):
         flags: parseShortBytes(offset + 8),
     };
     Log.trace("Parsed Thing on %1 -> %2", thingIdx, thing);
-    return Either.of(thing);
+    return thing;
 }
 
-const unfoldByDirectorySize = (dir: Directory, size: number): number[] =>
-    R.unfold((idx) => idx == dir.size / size ? false : [dir.filepos + idx * 10, idx + 1], 0)
-
 const parseThings = (bytes: number[], dirs: Directory[]) => (mapIdx: number): Either<Thing[]> => {
-    const thingDir = dirs[mapIdx + 1 + LumpType.THINGS]
+    const thingDir = dirs[mapIdx + MapLumpType.THINGS]
     const parser = parseThing(bytes, thingDir)
     return Either.ofCondition(
         () => thingDir.name === "THINGS",
         () => "Directory: " + thingDir + " on map " + mapIdx + " is not a Thing",
         () => unfoldByDirectorySize(thingDir, 10)
-            .map((ofs, thingIdx) => parser(thingIdx)).filter(th => th.isRight()).map(th => th.get()));
+            .map((ofs, thingIdx) => parser(thingIdx)).map(th => th));
 }
 
-const parseLinedef = (bytes: number[], thingDir: Directory, vertexes: Vertex[]) => (thingIdx: number): Linedef => {
-    const offset = thingDir.filepos + 14 * thingIdx;
-    const parseShortBytes = parseShort(bytes)
-    const linedef = {
-        dir: thingDir,
-        type: LumpType.LINEDEFS,
-        start: vertexes[parseShortBytes(offset)],
-        end: vertexes[parseShortBytes(offset + 2)],
-        flags: parseShortBytes(offset + 4),
-        specialType: parseShortBytes(offset + 6),
-        sectorTag: parseShortBytes(offset + 8),
-        frontSide: parseShortBytes(offset + 10),
-        backSide: parseShortBytes(offset + 12)
+const parseSidedef = (bytes: number[], dir: Directory) => (thingIdx: number): Sidedef => {
+    const offset = dir.filepos + 30 * thingIdx;
+    const parseShortBytes = util.parseShort(bytes)
+    const parseStrOpBytes = util.parseStrOp(bytes)(v => v !== "-", () => "")
+    const sidedef = {
+        dir: dir,
+        type: MapLumpType.SIDEDEFS,
+        offset: {
+            x: parseShortBytes(offset),
+            y: parseShortBytes(offset + 2),
+        },
+        upperTexture: parseStrOpBytes(offset + 4, 8),
+        lowerTexture: parseStrOpBytes(offset + 12, 8),
+        middleTexture: parseStrOpBytes(offset + 20, 8),
+        sector: parseShortBytes(offset + 28)
     };
-    Log.trace("Parsed Linedef on %1 -> %2", thingIdx, linedef);
-    return linedef;
+    Log.trace("Parsed Sidedef on %1 -> %2", thingIdx, sidedef);
+    return sidedef;
 }
 
-const parseLinedefs = (bytes: number[], dirs: Directory[], vertexes: Vertex[]) => (mapIdx: number): Either<Linedef[]> => {
-    const linedefsDir = dirs[mapIdx + 1 + LumpType.LINEDEFS]
-    const parser = parseLinedef(bytes, linedefsDir, vertexes)
+const parseSidedefs = (bytes: number[], dirs: Directory[]) => (mapIdx: number): Either<Sidedef[]> => {
+    const thingDir = dirs[mapIdx + MapLumpType.SIDEDEFS]
+    const parser = parseSidedef(bytes, thingDir)
     return Either.ofCondition(
-        () => linedefsDir.name === "LINEDEFS",
-        () => "Directory: " + linedefsDir + " on map " + mapIdx + " is not a Thing",
-        () => unfoldByDirectorySize(linedefsDir, 14).map((ofs, thingIdx) => parser(thingIdx)));
+        () => thingDir.name === "SIDEDEFS",
+        () => "Directory: " + thingDir + " on map " + mapIdx + " is not a Sidedef",
+        () => unfoldByDirectorySize(thingDir, 30)
+            .map((ofs, thingIdx) => parser(thingIdx)).map(th => th));
+}
+
+const parseLinedef = (bytes: number[], dir: Directory, vertexes: Vertex[], sidedefs: Sidedef[]) => (thingIdx: number): Either<Linedef> => {
+    const offset = dir.filepos + 14 * thingIdx;
+    const parseShortBytes = util.parseShort(bytes)
+    const parseShortOpBytes = util.parseShortOp(bytes)
+
+    const parseVertex = parseShortOpBytes(v => v < vertexes.length && v >= 0,
+        v => "Vertex out of bound: " + v + " of " + vertexes.length + " on " + offset)
+    const startVertex = parseVertex(offset).map(idx => vertexes[idx]);
+    const endVertex = parseVertex(offset + 2).map(idx => vertexes[idx]);
+
+    const parseSide = parseShortOpBytes(v => v < sidedefs.length && v >= 0,
+        v => "Sidedef out of bound: " + v + " of " + sidedefs.length + " on " + offset)
+    const frontSide = parseSide(offset + 10).map(idx => sidedefs[idx]);
+    const backSide = parseSide(offset + 12).map(idx => sidedefs[idx]);
+
+    return Either.ofTruth([startVertex, endVertex, frontSide], () =>
+        ({
+            dir: dir,
+            type: MapLumpType.LINEDEFS,
+            start: startVertex.get(),
+            end: endVertex.get(),
+            flags: parseShortBytes(offset + 4),
+            specialType: parseShortBytes(offset + 6),
+            sectorTag: parseShortBytes(offset + 8),
+            frontSide: frontSide.get(),
+            backSide: backSide
+        })).exec(v => {
+        Log.trace("Parsed Linedef on %1 -> %2", thingIdx, v)
+    })
+}
+
+const parseLinedefs = (bytes: number[], dirs: Directory[], vertexes: Vertex[], sidedefs: Sidedef[]) => (mapIdx: number): Either<Linedef[]> => {
+    const linedefsDir = dirs[mapIdx + MapLumpType.LINEDEFS]
+    const parser = parseLinedef(bytes, linedefsDir, vertexes, sidedefs)
+    const parsed = unfoldByDirectorySize(linedefsDir, 14).map((ofs, thingIdx) => parser(thingIdx)).filter(v => v.isRight()).map(v => v.get())
+    return Either.ofCondition(
+        () => linedefsDir.name === "LINEDEFS" && parsed.length > 0,
+        () => "Directory: " + linedefsDir + " on map " + mapIdx + " is not a LINEDEFS",
+        () => parsed);
 }
 
 const parseVertex = (bytes: number[], thingDir: Directory) => (thingIdx: number): Vertex => {
     const offset = thingDir.filepos + 4 * thingIdx;
-    const parseShortBytes = parseShort(bytes)
+    const parseShortBytes = util.parseShort(bytes)
     return {
         x: parseShortBytes(offset),
         y: parseShortBytes(offset + 2),
@@ -129,11 +138,11 @@ const parseVertex = (bytes: number[], thingDir: Directory) => (thingIdx: number)
 }
 
 const parseVertexes = (bytes: number[], dirs: Directory[]) => (mapIdx: number): Either<Vertex[]> => {
-    const thingDir = dirs[mapIdx + 1 + LumpType.VERTEXES]
+    const thingDir = dirs[mapIdx + MapLumpType.VERTEXES]
     const parser = parseVertex(bytes, thingDir)
     return Either.ofCondition(
         () => thingDir.name === "VERTEXES",
-        () => "Directory: " + thingDir + " on map " + mapIdx + " is not a Vertex",
+        () => "Directory: " + thingDir + " on map " + mapIdx + " is not a VERTEXES",
         () => unfoldByDirectorySize(thingDir, 4).map((ofs, thingIdx) => parser(thingIdx)));
 }
 
@@ -142,11 +151,11 @@ const parseAllDirectories = (header: Header, bytes: number[]): Directory[] =>
         .map((ofs, index) => parseDirectory(ofs, index, bytes))
 
 const parseDirectory = (offset: number, idx: number, bytes: number[]): Directory => {
-    const parseIntBytes = parseInt(bytes)
+    const parseIntBytes = util.parseInt(bytes)
     const dir = {
         filepos: parseIntBytes(offset),
         size: parseIntBytes(offset + 0x04),
-        name: parseStr(bytes)(offset + 0x08, 8),
+        name: util.parseStr(bytes)(offset + 0x08, 8),
         idx
     };
     Log.trace("Parsed Directory %1 on %2 -> %3", idx, offset, dir);
@@ -161,18 +170,18 @@ class WadParser {
 
 // ############################ EXPORTS ############################
 export const testFunctions = {
-    parseStr,
-    parseInt,
     parseHeader,
     parseDirectory,
     parseAllDirectories,
     isMapName,
-    findNextMapDir,
+    findNextMapDir: findNextMapStartDir,
     parseThing,
     parseThings,
     parseVertex,
-    parseShort,
     parseVertexes,
-    parseLinedef
+    parseLinedef,
+    parseLinedefs,
+    parseSidedef,
+    parseSidedefs
 }
 export default WadParser

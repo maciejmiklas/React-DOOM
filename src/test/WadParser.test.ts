@@ -1,12 +1,12 @@
 import {testFunctions as tf} from "../main/wad/WadParser";
-import {Directory, Header, Linedef, LumpType, Thing, Vertex, WadType} from "../main/wad/WadModel";
-import {base64ToUint8Array} from "../main/util"
+import {Directory, Header, Linedef, MapLumpType, Sidedef, Thing, Vertex, WadType} from "../main/wad/WadModel";
 import jsonData from "./data/doom.json"
 import {Either} from "../main/Either";
+import {util} from "../main/util";
 
 // @ts-ignore
-const WAD_BYTES = base64ToUint8Array(jsonData.doom)
-const IWAD_STR = [73, 87, 65, 68]
+const WAD_BYTES = util.base64ToUint8Array(jsonData.doom)
+
 const FIRST_MAP_DIR_OFFSET = 6 // starting from 0
 const HEADER: Either<Header> = tf.parseHeader(WAD_BYTES);
 const ALL_DIRS: Either<Directory[]> = HEADER.map(header => tf.parseAllDirectories(header, WAD_BYTES))
@@ -16,21 +16,21 @@ expect(FIRST_MAP.name).toEqual("E1M1")
 const E1M1_THINGS: Directory = {
     filepos: 130300,
     size: 1380,
-    name: LumpType[LumpType.THINGS],
+    name: MapLumpType[MapLumpType.THINGS],
     idx: 7
 }
 
 const E1M1_LINEDEFS: Directory = {
     filepos: 131680,
     size: 6650,
-    name: LumpType[LumpType.LINEDEFS],
+    name: MapLumpType[MapLumpType.LINEDEFS],
     idx: 8
 }
 
 const E1M1_BLOCKMAP: Directory = {
     filepos: 179096,
     size: 6922,
-    name: LumpType[LumpType.BLOCKMAP],
+    name: MapLumpType[MapLumpType.BLOCKMAP],
     idx: 16
 }
 
@@ -78,115 +78,6 @@ const VERTEX_466: Vertex = {
     y: -4848
 }
 
-describe("Parse Int", () => {
-    test("12", () => {
-        expect(tf.parseInt([0x0C, 0x00, 0x00, 0x00])(0)).toEqual(12)
-    });
-
-    test("12 offset", () => {
-        expect(tf.parseInt([0xFF, 0xFF, 0x0C, 0x00, 0x00, 0x00, 0xFF])(2)).toEqual(12)
-    });
-
-    test("1234567898", () => {
-        expect(tf.parseInt([0xDA, 0x02, 0x96, 0x49])(0)).toEqual(1234567898)
-    });
-
-    test("-999912", () => {
-        expect(tf.parseInt([0x18, 0xBE, 0xF0, 0xFF])(0)).toEqual(-999912)
-    });
-
-    test("-12", () => {
-        expect(tf.parseInt([0xF4, 0xFF, 0xFF, 0xFF])(0)).toEqual(-12)
-    });
-
-    test("-1", () => {
-        expect(tf.parseInt([0xFF, 0xFF, 0xFF, 0xFF])(0)).toEqual(-1)
-    });
-
-    test("-5", () => {
-        expect(tf.parseInt([0xFB, 0xFF, 0xFF, 0xFF])(0)).toEqual(-5)
-    });
-
-    test("1", () => {
-        expect(tf.parseInt([0x01, 0x00, 0x00, 0x00])(0)).toEqual(1)
-    });
-
-    test("5", () => {
-        expect(tf.parseInt([0x05, 0x00, 0x00, 0x00])(0)).toEqual(5)
-    });
-
-    test("-4160", () => {
-        expect(tf.parseInt([0xC0, 0xEF, 0xFF, 0xFF])(0)).toEqual(-4160)
-    });
-
-    test("-10000000", () => {
-        expect(tf.parseInt([0x80, 0x69, 0x67, 0xFF])(0)).toEqual(-10000000)
-    });
-
-});
-
-describe("Parse Short", () => {
-    test("12", () => {
-        expect(tf.parseShort([0x0C, 0x00])(0)).toEqual(12)
-    });
-
-    test("12 offset", () => {
-        expect(tf.parseShort([0xFF, 0xFF, 0x0C, 0x00, 0x00, 0x00, 0xFF])(2)).toEqual(12)
-    });
-
-    test("4160", () => {
-        expect(tf.parseShort([0x40, 0x10])(0)).toEqual(4160)
-    });
-
-    test("-12", () => {
-        expect(tf.parseShort([0xF4, 0xFF])(0)).toEqual(-12)
-    });
-
-    test("-1", () => {
-        expect(tf.parseShort([0xFF, 0xFF])(0)).toEqual(-1)
-    });
-
-    test("-5", () => {
-        expect(tf.parseShort([0xFB, 0xFF])(0)).toEqual(-5)
-    });
-
-    test("1", () => {
-        expect(tf.parseShort([0x01, 0x00])(0)).toEqual(1)
-    });
-
-    test("5", () => {
-        expect(tf.parseShort([0x05, 0x00])(0)).toEqual(5)
-    });
-
-    test("-4160", () => {
-        let val = 0;
-        val = val << 8 | 0xFF;
-        val = val << 8 | 0xFF;
-        val = val << 8 | 0xFF;
-        val = val << 8 | 0xFF;
-        val = val << 8 | 0xEF;
-        val = val << 8 | 0xC0;
-        expect(tf.parseShort([0xC0, 0xEF])(0)).toEqual(-4160)
-    });
-});
-
-describe("Parse Str", () => {
-    test("whole", () => {
-        expect(tf.parseStr(IWAD_STR)(0, 4)).toEqual("IWAD")
-    });
-
-    test("sub string", () => {
-        expect(tf.parseStr(IWAD_STR)(1, 2)).toEqual("WA")
-    });
-
-    test("length out of range", () => {
-        expect(tf.parseStr(IWAD_STR)(0, 5)).toEqual("IWAD")
-    });
-
-    test("out of range", () => {
-        expect(tf.parseStr(IWAD_STR)(6, 2)).toEqual("")
-    });
-});
 
 describe("Parse Header", () => {
     test("IWAD", () => {
@@ -218,7 +109,7 @@ describe("Find Map Directory", () => {
     });
 
     test("Second MAP", () => {
-        validate(FIRST_MAP_DIR_OFFSET + LumpType.BLOCKMAP + 2, FD_E1M2)
+        validate(FIRST_MAP_DIR_OFFSET + MapLumpType.BLOCKMAP + 1, FD_E1M2)
     });
 })
 
@@ -259,20 +150,20 @@ describe("Parse Thing", () => {
     const parser = tf.parseThing(WAD_BYTES, thingsDir);
 
     test("First Thing", () => {
-        validateFirstThing(parser(0).get())
+        validateFirstThing(parser(0))
     })
 
     test("Third Thing", () => {
-        validateThirdThing(parser(2).get());
+        validateThirdThing(parser(2));
     })
 
     test("Last Thing", () => {
-        validateLastThing(parser(thingsDir.size / 10 - 1).get());
+        validateLastThing(parser(thingsDir.size / 10 - 1));
     })
 })
 
 describe("Parse Things", () => {
-    const thingsDir = ALL_DIRS.get()[FIRST_MAP.idx + 1]
+    const thingsDir = ALL_DIRS.get()[FIRST_MAP.idx + MapLumpType.THINGS]
     expect(thingsDir.name).toEqual("THINGS")
     const parser = tf.parseThings(WAD_BYTES, ALL_DIRS.get())
     const things: Thing[] = parser(FIRST_MAP_DIR_OFFSET).get();
@@ -292,7 +183,142 @@ describe("Parse Things", () => {
     test("Last Thing", () => {
         validateLastThing(things[things.length - 1]);
     })
+
+    test("Amount", () => {
+        expect(things.length).toEqual(138)
+    })
 })
+
+const validateSidedef_0 = (thing: Sidedef) => {
+    validateSidedefDir(thing.dir)
+    expect(thing.offset.x).toEqual(0)
+    expect(thing.offset.y).toEqual(0)
+    expect(thing.upperTexture.isLeft()).toBeTruthy()
+    expect(thing.lowerTexture.isLeft()).toBeTruthy()
+    expect(thing.middleTexture.get()).toEqual("DOOR3")
+    expect(thing.sector).toEqual(40)
+}
+
+const validateSidedef_2 = (thing: Sidedef) => {
+    validateSidedefDir(thing.dir)
+    expect(thing.offset.x).toEqual(0)
+    expect(thing.offset.y).toEqual(0)
+    expect(thing.upperTexture.isLeft()).toBeTruthy()
+    expect(thing.lowerTexture.isLeft()).toBeTruthy()
+    expect(thing.middleTexture.get()).toEqual("LITE3")
+    expect(thing.sector).toEqual(40)
+}
+
+const validateSidedef_26 = (thing: Sidedef) => {
+    validateSidedefDir(thing.dir)
+    expect(thing.offset.x).toEqual(0)
+    expect(thing.offset.y).toEqual(0)
+    expect(thing.upperTexture.get()).toEqual("STARTAN3")
+    expect(thing.lowerTexture.get()).toEqual("STARTAN3")
+    expect(thing.middleTexture.isLeft()).toBeTruthy()
+    expect(thing.sector).toEqual(39)
+}
+
+const validateSidedef_27 = (thing: Sidedef) => {
+    validateSidedefDir(thing.dir)
+    expect(thing.offset.x).toEqual(0)
+    expect(thing.offset.y).toEqual(0)
+    expect(thing.upperTexture.isLeft()).toBeTruthy()
+    expect(thing.lowerTexture.isLeft()).toBeTruthy()
+    expect(thing.middleTexture.isLeft()).toBeTruthy()
+    expect(thing.sector).toEqual(14)
+}
+
+const validateSidedef_189 = (thing: Sidedef) => {
+    validateSidedefDir(thing.dir)
+    expect(thing.offset.x).toEqual(0)
+    expect(thing.offset.y).toEqual(0)
+    expect(thing.upperTexture.get()).toEqual("TEKWALL4")
+    expect(thing.lowerTexture.get()).toEqual("TEKWALL4")
+    expect(thing.middleTexture.isLeft()).toBeTruthy()
+    expect(thing.sector).toEqual(24)
+}
+
+const validateSidedef_211 = (thing: Sidedef) => {
+    validateSidedefDir(thing.dir)
+    expect(thing.offset.x).toEqual(0)
+    expect(thing.offset.y).toEqual(56)
+    expect(thing.upperTexture.isLeft()).toBeTruthy()
+    expect(thing.lowerTexture.isLeft()).toBeTruthy()
+    expect(thing.middleTexture.get()).toEqual("STARTAN3")
+    expect(thing.sector).toEqual(3)
+}
+
+const validateSidedef_442 = (thing: Sidedef) => {
+    validateSidedefDir(thing.dir)
+    expect(thing.offset.x).toEqual(64)
+    expect(thing.offset.y).toEqual(0)
+    expect(thing.upperTexture.isLeft()).toBeTruthy()
+    expect(thing.lowerTexture.isLeft()).toBeTruthy()
+    expect(thing.middleTexture.get()).toEqual("EXITDOOR")
+    expect(thing.sector).toEqual(84)
+}
+
+const validateSidedefDir = (dir: Directory) => {
+    expect(dir.name).toEqual("SIDEDEFS")
+}
+
+describe("Parse Sidedef", () => {
+    const thingsDir = ALL_DIRS.get()[FIRST_MAP.idx + +MapLumpType.SIDEDEFS]
+    validateSidedefDir(thingsDir)
+    const parser = tf.parseSidedef(WAD_BYTES, thingsDir);
+
+    test("Sidedef Nr. 0", () => {
+        validateSidedef_0(parser(0));
+    })
+
+    test("Sidedef Nr. 26", () => {
+        validateSidedef_26(parser(26));
+    })
+
+    test("Sidedef Nr. 189", () => {
+        validateSidedef_189(parser(189));
+    })
+
+    test("Sidedef Nr. 211", () => {
+        validateSidedef_211(parser(211));
+    })
+
+    test("Sidedef Nr. 442", () => {
+        validateSidedef_442(parser(442));
+    })
+})
+
+describe("Parse Sidedefs", () => {
+    const thingsDir = ALL_DIRS.get()[FIRST_MAP.idx + +MapLumpType.SIDEDEFS]
+    validateSidedefDir(thingsDir)
+    const parsed = tf.parseSidedefs(WAD_BYTES, ALL_DIRS.get())(FIRST_MAP_DIR_OFFSET).get();
+
+    test("Sidedef Nr. 0", () => {
+        validateSidedef_0(parsed[0]);
+    })
+
+    test("Sidedef Nr. 26", () => {
+        validateSidedef_26(parsed[26]);
+    })
+
+    test("Sidedef Nr. 189", () => {
+        validateSidedef_189(parsed[189]);
+    })
+
+    test("Sidedef Nr. 211", () => {
+        validateSidedef_211(parsed[211]);
+    })
+
+    test("Sidedef Nr. 442", () => {
+        validateSidedef_442(parsed[442]);
+    })
+
+    test("Amount", () => {
+        expect(parsed.length).toEqual(648)
+    })
+})
+
 
 const validateVertexesDir = (dir: Directory) => {
     expect(dir.name).toEqual("VERTEXES")
@@ -315,7 +341,7 @@ const validateLastVertex = (vertex: Vertex) => {
 }
 
 describe("Parse Vertex", () => {
-    const vertexesDir = ALL_DIRS.get()[FIRST_MAP.idx + 1 + LumpType.VERTEXES]
+    const vertexesDir = ALL_DIRS.get()[FIRST_MAP.idx + MapLumpType.VERTEXES]
     validateVertexesDir(vertexesDir);
     const parser = tf.parseVertex(WAD_BYTES, vertexesDir)
 
@@ -352,65 +378,86 @@ const validateLindedefsDir = (dir: Directory) => {
     expect(dir.name).toEqual("LINEDEFS")
 }
 
-const validateFirstLindedef = (lindedef: Linedef) => {
+const validateLindedef_0 = (lindedef: Linedef) => {
     validateVertex(VERTEX_0, lindedef.start)
     validateVertex(VERTEX_1, lindedef.end)
     expect(lindedef.flags).toEqual(1)
     expect(lindedef.sectorTag).toEqual(0)
-    expect(lindedef.frontSide).toEqual(0)
-    expect(lindedef.backSide).toEqual(-1)
+    validateSidedef_0(lindedef.frontSide)
+    expect(lindedef.backSide.isLeft()).toBeTruthy()
 }
 
-const validateThirdLindedef = (lindedef: Linedef) => {
+const validateLindedef_2 = (lindedef: Linedef) => {
     validateVertex(VERTEX_3, lindedef.start)
     validateVertex(VERTEX_0, lindedef.end)
     expect(lindedef.flags).toEqual(1)
     expect(lindedef.sectorTag).toEqual(0)
-    expect(lindedef.frontSide).toEqual(2)
-    expect(lindedef.backSide).toEqual(-1)
+    validateSidedef_2(lindedef.frontSide)
+    expect(lindedef.backSide.isLeft()).toBeTruthy()
 }
 
-const validate27thLindedef = (lindedef: Linedef) => {
+const validateLindedef_26 = (lindedef: Linedef) => {
     validateVertex(VERTEX_27, lindedef.start)
     validateVertex(VERTEX_26, lindedef.end)
     expect(lindedef.flags).toEqual(29)
     expect(lindedef.sectorTag).toEqual(0)
-    expect(lindedef.frontSide).toEqual(26)
-    expect(lindedef.backSide).toEqual(27)
+    validateSidedef_26(lindedef.frontSide)
+    validateSidedef_27(lindedef.backSide.get())
 }
 
 describe("Parse Linedef", () => {
-    const linedefDir = ALL_DIRS.get()[FIRST_MAP.idx + 1 + LumpType.LINEDEFS]
+    const linedefDir = ALL_DIRS.get()[FIRST_MAP.idx + MapLumpType.LINEDEFS]
     validateLindedefsDir(linedefDir);
     const vertexes = tf.parseVertexes(WAD_BYTES, ALL_DIRS.get())(FIRST_MAP_DIR_OFFSET).get()
-    const parser = tf.parseLinedef(WAD_BYTES, linedefDir, vertexes);
+    const sidedefs = tf.parseSidedefs(WAD_BYTES, ALL_DIRS.get())(FIRST_MAP_DIR_OFFSET).get();
+    const parser = tf.parseLinedef(WAD_BYTES, linedefDir, vertexes, sidedefs);
 
     test("First Linedef", () => {
-        validateFirstLindedef(parser(0))
+        const either = parser(0);
+        validateLindedef_0(either.get())
     })
 
     test("Third Linedef", () => {
-        validateThirdLindedef(parser(2))
+        validateLindedef_2(parser(2).get())
     })
 
     test("27th Linedef", () => {
-        validate27thLindedef(parser(26))
+        validateLindedef_26(parser(26).get())
+    })
+})
+
+describe("Parse Linedefs", () => {
+    const linedefDir = ALL_DIRS.get()[FIRST_MAP.idx + MapLumpType.LINEDEFS]
+    validateLindedefsDir(linedefDir);
+    const vertexes = tf.parseVertexes(WAD_BYTES, ALL_DIRS.get())(FIRST_MAP_DIR_OFFSET).get()
+    const sidedefs = tf.parseSidedefs(WAD_BYTES, ALL_DIRS.get())(FIRST_MAP_DIR_OFFSET).get();
+    const linedefs = tf.parseLinedefs(WAD_BYTES, ALL_DIRS.get(), vertexes, sidedefs)(FIRST_MAP_DIR_OFFSET).get();
+
+    test("First Linedef", () => {
+        validateLindedef_0(linedefs[0])
     })
 
+    test("Third Linedef", () => {
+        validateLindedef_2(linedefs[2])
+    })
+
+    test("27th Linedef", () => {
+        validateLindedef_26(linedefs[26])
+    })
 })
 
 describe("Parse Map Directory", () => {
     const validate = HEADER.map(v => validateDir(v)).get()
     test("First MAP - THINGS", () => {
-        validate(FIRST_MAP_DIR_OFFSET + 1 + LumpType.THINGS, E1M1_THINGS)
+        validate(FIRST_MAP_DIR_OFFSET + MapLumpType.THINGS, E1M1_THINGS)
     })
 
     test("First MAP - LINEDEFS", () => {
-        validate(FIRST_MAP_DIR_OFFSET + 1 + LumpType.LINEDEFS, E1M1_LINEDEFS)
+        validate(FIRST_MAP_DIR_OFFSET + MapLumpType.LINEDEFS, E1M1_LINEDEFS)
     })
 
     test("First MAP - BLOCKMAP", () => {
-        validate(FIRST_MAP_DIR_OFFSET + 1 + LumpType.BLOCKMAP, E1M1_BLOCKMAP)
+        validate(FIRST_MAP_DIR_OFFSET + MapLumpType.BLOCKMAP, E1M1_BLOCKMAP)
     })
 })
 

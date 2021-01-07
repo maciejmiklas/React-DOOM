@@ -29,7 +29,7 @@ export abstract class Either<T> {
 
     abstract exec(fn: (T) => void): Left<T> | Right<T>
 
-    static of<T>(val: T): Right<T> {
+    static ofRight<T>(val: T): Right<T> {
         return new Right<T>(val)
     }
 
@@ -43,6 +43,11 @@ export abstract class Either<T> {
 
     static ofCondition<T>(cnd: () => boolean, left: () => string, right: () => T): Left<T> | Right<T> {
         return cnd() ? new Right<T>(right()) : new Left(left())
+    }
+
+    static ofTruth<T>(truth: Either<any>[], right: () => T): Left<T> | Right<T> {
+        const left = truth.filter(e => e.isLeft())
+        return left.length == 0 ? new Right<T>(right()) : new Left(left.map(l => l.message()).join(","))
     }
 }
 
