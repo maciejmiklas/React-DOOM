@@ -1,3 +1,15 @@
+/**
+ * WAD - "Where's All the Data?" contains maps for each level, monsters, pickups, sound and textures, so basically
+ * whole data set for DOOM game.
+ *
+ * WAD begins with a Header, this one contains offset to list of Directory entries and amount of directories.
+ * Each Directory contains name of the Lump and pointed to data in file for this Lump.
+ *
+ * Lump is basically any kind of data that can be found in WAD and the location of the Lump is given by Directory.
+ *
+ * Map consists of Lumps such: Thing (monster) or Linedef (wall), but Lump can be also a texture or sound.
+ */
+
 /** A WAD file always starts with a 12-byte header. */
 import {Either} from "../Either";
 
@@ -94,7 +106,7 @@ export type Vertex = Position & {
 }
 
 /**
- * Shape of the Map
+ * Linedef represents single wall on the map.
  * @see https://doomwiki.org/wiki/Linedef
  */
 export type Linedef = MapLump & {
@@ -108,6 +120,8 @@ export type Linedef = MapLump & {
 }
 
 /**
+ * Sidedef contains textures for each wall on the map (Linedef)
+ *
  * @see https://doomwiki.org/wiki/Sidedef
  */
 export type Sidedef = MapLump & {
@@ -138,6 +152,22 @@ export type Sector = MapLump & {
     xxx: number
 }
 
+/**
+ * Map can be found within WAD as a directory with Name following syntax: ExMy or MAPxx. This directory is being
+ * followed by:
+ E1M1 --
+ THINGS
+ LINEDEFS
+ SIDEDEFS
+ VERTEXES
+ SEGS
+ SSECTORS
+ NODES
+ SECTORS
+ REJECT
+ BLOCKMAP
+ * Each Map contains those directories in exact this order.
+ */
 export type Map = {
     nameDir: Directory
     things: Thing[]
@@ -154,3 +184,35 @@ export enum WadType {
     IWAD,
     PWAD
 }
+
+/**
+ * Header of Doom Picture (Patch)
+ * @see https://doomwiki.org/wiki/Picture_format
+ */
+export type PatchHeader = {
+    width: number
+    height:number
+    leftoffset:number
+    topoffset:number
+
+    /** Columns offsets relative to start of WAD file */
+    columnofs:number[]
+}
+
+/**
+ * Picture/bitmap in Doom's Patch format
+ * @see https://doomwiki.org/wiki/Picture_format
+ */
+export type PatchBitmap = {
+
+}
+
+/**
+ * Title pictures from WAD
+ */
+export type TitlePic = {
+    help: PatchBitmap[]
+    title: PatchBitmap,
+    credits: PatchBitmap
+}
+

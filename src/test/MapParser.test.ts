@@ -1,83 +1,24 @@
-import {testFunctions as tf} from "../main/wad/WadParser";
-import {Directory, Header, Linedef, MapLumpType, Sidedef, Thing, Vertex, WadType} from "../main/wad/WadModel";
-import jsonData from "./data/doom.json"
-import {Either} from "../main/Either";
-import {util} from "../main/util";
+import {testFunctions as tf} from "../main/wad/MapParser";
 
-// @ts-ignore
-const WAD_BYTES = util.base64ToUint8Array(jsonData.doom)
-
-const FIRST_MAP_DIR_OFFSET = 6 // starting from 0
-const HEADER: Either<Header> = tf.parseHeader(WAD_BYTES);
-const ALL_DIRS: Either<Directory[]> = HEADER.map(header => tf.parseAllDirectories(header, WAD_BYTES))
-const FIRST_MAP: Directory = ALL_DIRS.map(dirs => tf.findNextMapDir(dirs)).get()(0).get();
-expect(FIRST_MAP.name).toEqual("E1M1")
-
-const E1M1_THINGS: Directory = {
-    filepos: 130300,
-    size: 1380,
-    name: MapLumpType[MapLumpType.THINGS],
-    idx: 7
-}
-
-const E1M1_LINEDEFS: Directory = {
-    filepos: 131680,
-    size: 6650,
-    name: MapLumpType[MapLumpType.LINEDEFS],
-    idx: 8
-}
-
-const E1M1_BLOCKMAP: Directory = {
-    filepos: 179096,
-    size: 6922,
-    name: MapLumpType[MapLumpType.BLOCKMAP],
-    idx: 16
-}
-
-const FD_E1M1: Directory = {
-    filepos: 130300,
-    size: 0,
-    name: "E1M1",
-    idx: 6
-}
-
-const FD_E1M2: Directory = {
-    filepos: 186020,
-    size: 0,
-    name: "E1M2",
-    idx: 17
-}
-
-const VERTEX_0: Vertex = {
-    x: 1088,
-    y: -3680
-}
-
-const VERTEX_1: Vertex = {
-    x: 1024,
-    y: -3680
-}
-const VERTEX_2: Vertex = {
-    x: 1024,
-    y: -3648
-}
-const VERTEX_3: Vertex = {
-    x: 1088,
-    y: -3648
-}
-const VERTEX_26: Vertex = {
-    x: 1344,
-    y: -3360
-}
-const VERTEX_27: Vertex = {
-    x: 1344,
-    y: -3264
-}
-const VERTEX_466: Vertex = {
-    x: 2912,
-    y: -4848
-}
-
+import {Directory, Linedef, MapLumpType, Sidedef, Thing, Vertex, WadType} from "../main/wad/WadModel";
+import {
+    ALL_DIRS,
+    E1M1_BLOCKMAP,
+    E1M1_LINEDEFS,
+    E1M1_THINGS,
+    FIRST_MAP,
+    FIRST_MAP_DIR_OFFSET,
+    HEADER,
+    validateDir,
+    VERTEX_0,
+    VERTEX_1,
+    VERTEX_2,
+    VERTEX_26,
+    VERTEX_27,
+    VERTEX_3,
+    VERTEX_466,
+    WAD_BYTES
+} from "./TestData";
 
 describe("Parse Header", () => {
     test("IWAD", () => {
@@ -87,31 +28,6 @@ describe("Parse Header", () => {
         expect(header.infotableofs).toEqual(4205648)
     });
 });
-
-const eqDir = (dir: Directory, given: Directory) => {
-    expect(dir.name).toEqual(given.name)
-    expect(dir.filepos).toEqual(given.filepos)
-    expect(dir.size).toEqual(given.size)
-    expect(dir.idx).toEqual(given.idx)
-}
-
-const validateDir = (header: Header) => (nr: number, given: Directory) => {
-    const dir = tf.parseDirectory(header.infotableofs + 16 * nr, nr, WAD_BYTES);
-    eqDir(dir, given);
-}
-
-describe("Find Map Directory", () => {
-    const header = HEADER.get();
-    const validate = validateDir(header);
-
-    test("First MAP", () => {
-        validate(FIRST_MAP_DIR_OFFSET, FD_E1M1)
-    });
-
-    test("Second MAP", () => {
-        validate(FIRST_MAP_DIR_OFFSET + MapLumpType.BLOCKMAP + 1, FD_E1M2)
-    });
-})
 
 const validateThingsDir = (dir: Directory) => {
     expect(dir.name).toEqual("THINGS")
@@ -319,7 +235,6 @@ describe("Parse Sidedefs", () => {
     })
 })
 
-
 const validateVertexesDir = (dir: Directory) => {
     expect(dir.name).toEqual("VERTEXES")
 }
@@ -522,35 +437,5 @@ describe("Is Map Name", () => {
 
 })
 
-const findDirectory = (dir: Directory, dirs: Directory[]) =>
-    dirs.find(d => (d.name === dir.name && d.filepos === dir.filepos && d.size == dir.size))
 
-describe("Parse All Directories", () => {
-    const header = HEADER.get();
-    const allDirs = tf.parseAllDirectories(header, WAD_BYTES);
-    const validate = (dir: Directory) => {
-        const found = findDirectory(dir, allDirs)
-        eqDir(dir, found)
-    }
-    test("First MAP", () => {
-        validate(FD_E1M1);
-    });
-
-    test("Second MAP", () => {
-        validate(FD_E1M2);
-    });
-
-    test("First MAP - THINGS", () => {
-        validate(E1M1_THINGS);
-    });
-
-    test("First MAP - LINEDEFS", () => {
-        validate(E1M1_LINEDEFS);
-    });
-
-    test("First MAP - BLOCKMAP", () => {
-        validate(E1M1_BLOCKMAP);
-    });
-
-})
 
