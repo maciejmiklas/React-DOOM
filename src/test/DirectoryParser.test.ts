@@ -1,15 +1,16 @@
-import {testFunctions as tf} from "../main/wad/WadParser";
 import {Directory, MapLumpType} from "../main/wad/WadModel";
 import {functions as dp} from "../main/wad/DirectoryParser";
 import {
-    ALL_DIRS, E1M1_BLOCKMAP,
+    ALL_DIRS,
+    E1M1_BLOCKMAP,
     E1M1_LINEDEFS,
     E1M1_THINGS,
     eqDir,
     FD_E1M1,
     FD_E1M2,
     FIRST_MAP_DIR_OFFSET,
-    HEADER, validateDir,
+    HEADER,
+    validateDir,
     WAD_BYTES
 } from "./TestData";
 

@@ -1,6 +1,6 @@
 import * as R from "ramda";
 import {Either} from "../Either"
-import {Directory, Header, Linedef, MapLumpType, PatchHeader, Sidedef, Thing, Vertex, WadType} from "./WadModel";
+import {Directory, Linedef, MapLumpType,  Sidedef, Thing, Vertex} from "./WadModel";
 import {Log} from "../Log";
 import {util} from "../util";
 

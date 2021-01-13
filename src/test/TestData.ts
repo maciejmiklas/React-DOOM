@@ -1,10 +1,7 @@
-import {testFunctions as tf} from "../main/wad/WadParser";
+import {testFunctions as mpt} from "../main/wad/MapParser";
 import {functions as dp} from "../main/wad/DirectoryParser";
 
-import {
-    Directory,
-    Header, MapLumpType, Vertex,
-} from "../main/wad/WadModel";
+import {Directory, Header, MapLumpType, Vertex,} from "../main/wad/WadModel";
 
 import jsonData from "./data/doom.json"
 import {Either} from "../main/Either";
@@ -16,7 +13,7 @@ export const WAD_BYTES = util.base64ToUint8Array(jsonData.doom)
 export const FIRST_MAP_DIR_OFFSET = 6 // starting from 0
 export const HEADER: Either<Header> = dp.parseHeader(WAD_BYTES);
 export const ALL_DIRS: Either<Directory[]> = HEADER.map(header => dp.parseAllDirectories(header, WAD_BYTES))
-export const FIRST_MAP: Directory = ALL_DIRS.map(dirs => tf.findNextMapDir(dirs)).get()(0).get();
+export const FIRST_MAP: Directory = ALL_DIRS.map(dirs => mpt.findNextMapDir(dirs)).get()(0).get();
 expect(FIRST_MAP.name).toEqual("E1M1")
 
 export const FD_E1M1: Directory = {
