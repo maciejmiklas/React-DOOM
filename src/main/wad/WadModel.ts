@@ -26,6 +26,8 @@ export type Header = {
 /**
  * The directory associates names of lumps with the data that belong to them. It consists of a number of entries,
  * each with a length of 16 bytes. The length of the directory is determined by the number given in the WAD header.
+ *
+ * @see https://doomwiki.org/wiki/WAD#Directory
  */
 export type Directory = {
 
@@ -35,7 +37,7 @@ export type Directory = {
     /** Start of Lump's data in WAD  */
     filepos: number
 
-    /** Lump size in bytes */
+    /** Lump size in bytes. Lump position int WAD: [#filepos,....,#filepos + size] */
     size: number
 
     /** Lump's name. Map contains of few predefined Lumps (MapLumpType), but there are also other types of Lumps */
@@ -190,29 +192,84 @@ export enum WadType {
  * @see https://doomwiki.org/wiki/Picture_format
  */
 export type PatchHeader = {
+    dir: Directory
     width: number
-    height:number
-    leftoffset:number
-    topoffset:number
+    height: number
+    xOffset: number
+    yOffset: number
 
-    /** Columns offsets relative to start of WAD file */
-    columnofs:number[]
+    /**
+     * Columns offsets relative to start of WAD file.
+     * Size of this array is given by width, because it represents horizontal lines on bitmap.
+     * Each value in this array points to byes array in WAD file, the size of this array is determined by height.
+     *
+     * For picture 320x200 we have #columnofs with 320 entries, each one pointing to array in WAD that is 200 bytes long
+     */
+    columnofs: number[]
+}
+
+/**
+ * Bitmap column (known as post) of Doom's bitmap. Offset to each columns is given by PatchHeader#columnofs
+ *
+ * @see https://doomwiki.org/wiki/Picture_format -> Posts
+ */
+export type Post = {
+
+    /** vertical offset of this post in patch. */
+    topdelta: number
+
+    /** Total size of this post including padding bytes. Used to calculate position of next post in column */
+    postBytes: number
+
+    /**
+     * Array of pixels is this post. Length is given by #length.
+     * Each pixel has value 0-255 and it's an index in Doom palate
+     */
+    data: number[]
+
+    /** Starting position in WAD of this Post */
+    filepos: number
+}
+
+/**
+ * Data of each column is divided into posts, which are lines going downward on the screen (columns).
+ *
+ * ???
+ * Each post has offset in pixels, that gives it's position in column. There could be gap between Posts - in
+ * such case free pixels are transparent
+ * ????
+ *
+ */
+export type Column = {
+    posts: Post[]
 }
 
 /**
  * Picture/bitmap in Doom's Patch format
+ *
  * @see https://doomwiki.org/wiki/Picture_format
+ * @see https://www.cyotek.com/blog/decoding-doom-picture-files
  */
 export type PatchBitmap = {
-
+    header: PatchHeader
+    columns: Column[]
 }
 
 /**
  * Title pictures from WAD
+ *
+ * @see https://doomwiki.org/wiki/Title_screen
  */
 export type TitlePic = {
-    help: PatchBitmap[]
+    help: Either<PatchBitmap[]>
     title: PatchBitmap,
-    credits: PatchBitmap
+    credit: PatchBitmap
+}
+
+export type Wad = {
+    header: Header,
+    title: TitlePic,
+    maps: Map[],
+    dirs: Directory[]
 }
 

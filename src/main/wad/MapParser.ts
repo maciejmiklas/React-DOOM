@@ -2,7 +2,7 @@ import * as R from "ramda";
 import {Either} from "../Either"
 import {Directory, Linedef, MapLumpType,  Sidedef, Thing, Vertex} from "./WadModel";
 import {Log} from "../Log";
-import {util} from "../util";
+import U from "../util";
 
 /** The type of the map has to be in the form ExMy or MAPxx */
 const isMapName = (name: string): boolean =>
@@ -17,19 +17,19 @@ const unfoldByDirectorySize = (dir: Directory, size: number): number[] =>
 
 const parseThing = (bytes: number[], dir: Directory) => (thingIdx: number): Thing => {
     const offset = dir.filepos + 10 * thingIdx;
-    const parseShortBytes = util.parseShort(bytes)
+    const shortParser = U.parseShort(bytes)
     const thing = {
         dir: dir,
         name: MapLumpType.THINGS,
         position: {
-            x: parseShortBytes(offset),
-            y: parseShortBytes(offset + 2),
+            x: shortParser(offset),
+            y: shortParser(offset + 2),
         },
-        angleFacing: parseShortBytes(offset + 4),
+        angleFacing: shortParser(offset + 4),
 
         // TODO type should be enum from https://doomwiki.org/wiki/Thing_types#Monsters
-        type: parseShortBytes(offset + 6),
-        flags: parseShortBytes(offset + 8),
+        type: shortParser(offset + 6),
+        flags: shortParser(offset + 8),
     };
     Log.trace("Parsed Thing on %1 -> %2", thingIdx, thing);
     return thing;
@@ -47,19 +47,19 @@ const parseThings = (bytes: number[], dirs: Directory[]) => (idx: number): Eithe
 
 const parseSidedef = (bytes: number[], dir: Directory) => (idx: number): Sidedef => {
     const offset = dir.filepos + 30 * idx;
-    const parseShortBytes = util.parseShort(bytes)
-    const parseStrOpBytes = util.parseStrOp(bytes)(v => v !== "-", () => "")
+    const shortParser = U.parseShort(bytes)
+    const strOpParser = U.parseStrOp(bytes)(v => v !== "-", () => "")
     const sidedef = {
         dir: dir,
         type: MapLumpType.SIDEDEFS,
         offset: {
-            x: parseShortBytes(offset),
-            y: parseShortBytes(offset + 2),
+            x: shortParser(offset),
+            y: shortParser(offset + 2),
         },
-        upperTexture: parseStrOpBytes(offset + 4, 8),
-        lowerTexture: parseStrOpBytes(offset + 12, 8),
-        middleTexture: parseStrOpBytes(offset + 20, 8),
-        sector: parseShortBytes(offset + 28)
+        upperTexture: strOpParser(offset + 4, 8),
+        lowerTexture: strOpParser(offset + 12, 8),
+        middleTexture: strOpParser(offset + 20, 8),
+        sector: shortParser(offset + 28)
     };
     Log.trace("Parsed Sidedef on %1 -> %2", idx, sidedef);
     return sidedef;
@@ -77,15 +77,15 @@ const parseSidedefs = (bytes: number[], dirs: Directory[]) => (mapIdx: number): 
 
 const parseLinedef = (bytes: number[], dir: Directory, vertexes: Vertex[], sidedefs: Sidedef[]) => (thingIdx: number): Either<Linedef> => {
     const offset = dir.filepos + 14 * thingIdx;
-    const parseShortBytes = util.parseShort(bytes)
-    const parseShortOpBytes = util.parseShortOp(bytes)
+    const shortParser = U.parseShort(bytes)
+    const shortOpParser = U.parseShortOp(bytes)
 
-    const parseVertex = parseShortOpBytes(v => v < vertexes.length && v >= 0,
+    const parseVertex = shortOpParser(v => v < vertexes.length && v >= 0,
         v => "Vertex out of bound: " + v + " of " + vertexes.length + " on " + offset)
     const startVertex = parseVertex(offset).map(idx => vertexes[idx]);
     const endVertex = parseVertex(offset + 2).map(idx => vertexes[idx]);
 
-    const parseSide = parseShortOpBytes(v => v < sidedefs.length && v >= 0,
+    const parseSide = shortOpParser(v => v < sidedefs.length && v >= 0,
         v => "Sidedef out of bound: " + v + " of " + sidedefs.length + " on " + offset)
     const frontSide = parseSide(offset + 10).map(idx => sidedefs[idx]);
     const backSide = parseSide(offset + 12).map(idx => sidedefs[idx]);
@@ -96,9 +96,9 @@ const parseLinedef = (bytes: number[], dir: Directory, vertexes: Vertex[], sided
             type: MapLumpType.LINEDEFS,
             start: startVertex.get(),
             end: endVertex.get(),
-            flags: parseShortBytes(offset + 4),
-            specialType: parseShortBytes(offset + 6),
-            sectorTag: parseShortBytes(offset + 8),
+            flags: shortParser(offset + 4),
+            specialType: shortParser(offset + 6),
+            sectorTag: shortParser(offset + 8),
             frontSide: frontSide.get(),
             backSide: backSide
         })).exec(v => {
@@ -118,10 +118,10 @@ const parseLinedefs = (bytes: number[], dirs: Directory[], vertexes: Vertex[], s
 
 const parseVertex = (bytes: number[], thingDir: Directory) => (thingIdx: number): Vertex => {
     const offset = thingDir.filepos + 4 * thingIdx;
-    const parseShortBytes = util.parseShort(bytes)
+    const shortParser = U.parseShort(bytes)
     return {
-        x: parseShortBytes(offset),
-        y: parseShortBytes(offset + 2),
+        x: shortParser(offset),
+        y: shortParser(offset + 2),
     };
 }
 

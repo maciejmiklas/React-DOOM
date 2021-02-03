@@ -27,7 +27,26 @@ export abstract class Either<T> {
 
     abstract map(fn: (T) => any): Left<any> | Right<any>
 
+    abstract append<V>(producer: (T) => Either<V>, appender: (T, V) => void): Left<T> | Right<T>
+
     abstract exec(fn: (T) => void): Left<T> | Right<T>
+
+    static until = <T>(next: (previous: T) => Either<T>, init: Either<T>, max: number = 500): Either<T[]> => {
+        let val = init;
+        const all = []
+        let cnt = 0;
+        while (val.isRight() && cnt <= max) {
+            val.exec((v) => all.push(v))
+            val = next(val.get())
+            cnt = cnt + 1
+        }
+        return Either.ofCondition(() => all.length > 0, () => "Empty result for " + init, () => all)
+    }
+
+    static ofArray = <T>(...args: Either<T>[]): Either<T[]> => {
+        const ret = args.filter(e => e.isRight()).map(e => e.get())
+        return Either.ofCondition(() => ret.length > 0, () => "All candidates for Array are Left: " + args, () => ret)
+    }
 
     static ofRight<T>(val: T): Right<T> {
         return new Right<T>(val)
@@ -62,12 +81,15 @@ export class Left<T> extends Either<T> {
     }
 
     exec(fn: (T) => void): Left<T> {
-        fn(null);
         return this
     }
 
     isLeft(): boolean {
         return true
+    }
+
+    append<V>(producer: (T) => Either<V>, appender: (T, V) => void): Left<T> | Right<T> {
+        return this;
     }
 
     isRight(): boolean {
@@ -109,8 +131,22 @@ export class Right<T> extends Either<T> {
         return this
     }
 
-    map(fn: (T) => any): Right<any> {
-        const res = fn(this.get());
+    append<V>(producer: (T) => Either<V>, appender: (T, V) => void): Left<T> | Right<T> {
+        const val = this.get();
+        const res = producer(val);
+        if (R.isNil(res) || res.isLeft()) {
+            return Either.ofLeft("Append got null for " + val)
+        }
+        appender(val, res.get())
+        return new Right(val);
+    }
+
+    map(fn: (T) => any): Left<T> | Right<T> {
+        const val = this.get();
+        const res = fn(val);
+        if (R.isNil(res)) {
+            return Either.ofLeft("Map got null for " + val)
+        }
         return res instanceof Either ? res : new Right(res);
     }
 

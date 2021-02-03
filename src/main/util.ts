@@ -1,7 +1,7 @@
 import * as R from "ramda";
 import {Either} from "./Either";
 
-const uint8ArrayToBase64 = (bytes: number[]) => {
+const uint8ArrayToBase64 = (bytes: number[]): string => {
     let binary = '';
     const len = bytes.length;
     for (let i = 0; i < len; i++) {
@@ -31,7 +31,7 @@ const parseStrOp = (bytes: number[]) => (cnd: (val: string) => boolean, emsg: (v
     return Either.ofCondition(() => cnd(str), () => emsg(str), () => str)
 }
 
-/** Converts given 4-byte array to number. Notation: little-endian (two's complement) */
+/** Converts given signed 4-byte array to number. Notation: little-endian (two's complement) */
 const parseNumber = (bytes: number[]) => (pos: number): number =>
     R.pipe<number[], number[], number[], number>(
         R.slice(pos, pos + 4),
@@ -39,12 +39,17 @@ const parseNumber = (bytes: number[]) => (pos: number): number =>
         R.curry(R.reduce)((val: number, cur: number) => val << 8 | cur, 0)
     )(bytes)
 
-/** little-endian 32bit signed (two's complement) int */
+/** little-endian 32bit signed int. Notation: little-endian (two's complement) */
 const parseInt = (bytes: number[]) => (pos: number): number => parseNumber(bytes)(pos)
+
+/** little-endian 32bit int without sign. Notation: little-endian (two's complement) */
+const parseUint = (bytes: number[]) => (pos: number): number => parseNumber(bytes)(pos) >>> 0
+
+const parseUbyte = (bytes: number[]) => (pos: number): number => bytes[pos] >>> 0
 
 const signedByte = (byte: number) => (byte & 0x80) === 0x80
 
-/** little-endian 16bit signed (two's complement) int */
+/** little-endian 16bit signed short. Notation: little-endian (two's complement) */
 const parseShort = (bytes: number[]) => (pos: number): number => {
     const padding = signedByte(bytes[pos + 1]) ? 0xFF : 0x00
     return parseNumber([bytes[pos], bytes[pos + 1], padding, padding])(0)
@@ -54,17 +59,19 @@ const parseShortOp = (bytes: number[]) => (cnd: (val: number) => boolean, emsg: 
     const parsed = parseShort(bytes)(pos);
     return Either.ofCondition(() => cnd(parsed), () => emsg(parsed), () => parsed)
 }
-export const ts = {trim0Padding}
 
-export const util = {
+const U = {
     uint8ArrayToBase64,
     base64ToUint8Array,
     trim0Padding,
     parseStr,
-    parseNumber,
     parseStrOp,
     parseInt,
     parseShort,
-    parseShortOp
+    parseShortOp,
+    parseUint,
+    parseUbyte
 }
+
+export default U
 

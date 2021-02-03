@@ -1,18 +1,18 @@
 import {testFunctions as mpt} from "../main/wad/MapParser";
 import {functions as dp} from "../main/wad/DirectoryParser";
 
-import {Directory, Header, MapLumpType, Vertex,} from "../main/wad/WadModel";
+import {Column, Directory, Header, MapLumpType, PatchHeader, Vertex,} from "../main/wad/WadModel";
 
 import jsonData from "./data/doom.json"
 import {Either} from "../main/Either";
-import {util} from "../main/util";
+import U from "../main/util";
 
 // @ts-ignore
-export const WAD_BYTES = util.base64ToUint8Array(jsonData.doom)
+export const WAD_BYTES = U.base64ToUint8Array(jsonData.doom)
 
 export const FIRST_MAP_DIR_OFFSET = 6 // starting from 0
 export const HEADER: Either<Header> = dp.parseHeader(WAD_BYTES);
-export const ALL_DIRS: Either<Directory[]> = HEADER.map(header => dp.parseAllDirectories(header, WAD_BYTES))
+export const ALL_DIRS: Either<Directory[]> = HEADER.map(header => dp.parseAllDirectories(header, WAD_BYTES).get())
 export const FIRST_MAP: Directory = ALL_DIRS.map(dirs => mpt.findNextMapDir(dirs)).get()(0).get();
 expect(FIRST_MAP.name).toEqual("E1M1")
 
@@ -29,7 +29,6 @@ export const FD_E1M2: Directory = {
     name: "E1M2",
     idx: 17
 }
-
 
 export const E1M1_THINGS: Directory = {
     filepos: 130300,
@@ -97,4 +96,37 @@ export const eqDir = (dir: Directory, given: Directory) => {
 export const validateDir = (header: Header) => (nr: number, given: Directory) => {
     const dir = dp.parseDirectory(header.infotableofs + 16 * nr, nr, WAD_BYTES);
     eqDir(dir, given);
+}
+
+export const validateTitleColumn = (col: Column) => {
+    const posts = col.posts;
+    expect(posts.length).toEqual(2)
+    expect(posts[0].topdelta).toEqual(0)
+    expect(posts[1].topdelta).toEqual(posts[0].data.length)
+    expect(posts[0].data.length + posts[1].data.length).toEqual(200)
+}
+
+export const validateTitlePatchHeader = (header: PatchHeader) => {
+    expect(header.width).toEqual(320)
+    expect(header.height).toEqual(200)
+    expect(header.xOffset).toEqual(0)
+    const dir = header.dir;
+
+    // Sizes:
+    //  - patch header: 6
+    //  - columnofs array: 4 * header.width
+    //  - 2 padding bytes after #columnofs
+    const firstPostOffset = dir.filepos + 6 + 4 * header.width + 2
+
+    expect(header.columnofs[0]).toEqual(firstPostOffset)
+
+    // FIXME it's 1075 bytes over dir-size, is this legit?
+    const maxFilePos = dir.filepos + dir.size + 1075
+    expect(firstPostOffset).toBeLessThan(maxFilePos)
+
+    for (const postFilePos of header.columnofs) {
+        expect(postFilePos).toBeGreaterThanOrEqual(firstPostOffset)
+        expect(postFilePos).toBeLessThanOrEqual(maxFilePos)
+    }
+    expect(header.yOffset).toEqual(0)
 }

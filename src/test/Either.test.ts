@@ -1,5 +1,57 @@
 import {Either} from '../main/Either'
 
+describe("Either.ofArray", () => {
+    test("All Left", () => {
+        const res = Either.ofArray(Either.ofLeft("l1"), Either.ofLeft("l2"), Either.ofLeft("l3"))
+        expect(res.isLeft()).toBeTruthy()
+    })
+
+    test("All Right", () => {
+        const res = Either.ofArray(Either.ofRight(1), Either.ofRight(10), Either.ofRight(3))
+        expect(res.isRight()).toBeTruthy()
+        expect(res.get()).toEqual([1, 10, 3])
+    })
+
+    test("Mix", () => {
+        const res = Either.ofArray(Either.ofRight(1), Either.ofLeft("l2"), Either.ofRight(10), Either.ofRight(3))
+        expect(res.isRight()).toBeTruthy()
+        expect(res.get()).toEqual([1, 10, 3])
+    })
+
+})
+
+describe("Either.unitl", () => {
+    test("number array", () => {
+        const res = Either.until<number>(v => Either.ofCondition(() => v < 5, () => "End", () => v + 1), Either.ofRight(0)).get()
+        expect(res).toEqual([0, 1, 2, 3, 4, 5])
+    })
+
+    test("empty result", () => {
+        const res = Either.until<number>(v => Either.ofCondition(() => false, () => "End", () => v + 1), Either.ofLeft("LEFT"))
+        expect(res.isLeft()).toBeTruthy()
+    })
+})
+
+describe("Either.append", () => {
+    test("Append to from Right to Right", () => {
+        const ei = Either.ofRight({vv: "123"});
+        const res = ei.append(v => Either.ofRight(v.vv + "-abc"), (t, v) => t.pp = v)
+        expect(res.get()).toEqual({vv: "123", pp: "123-abc"})
+    })
+
+    test("Append to from Right to Left", () => {
+        const ei = Either.ofRight({vv: "123"});
+        const res = ei.append(v => Either.ofLeft("noo"), (t, v) => t.pp = v)
+        expect(res.isLeft()).toBeTruthy()
+    })
+
+    test("Append to from Left to Right", () => {
+        const ei = Either.ofLeft("123");
+        const res = ei.append(v => Either.ofRight(v.vv + "-abc"), (t, v) => t.pp = v)
+        expect(res.isLeft()).toBeTruthy()
+    })
+})
+
 describe("Either.of", () => {
     const str = Either.ofRight("123");
     test("isLeft", () => {
@@ -45,6 +97,10 @@ describe("Either.map", () => {
 
     test("null", () => {
         expect(nil.map(v => v + 1).isLeft()).toBeTruthy()
+    })
+
+    test("map to null", () => {
+        expect(nn.map(v => null).isLeft()).toBeTruthy()
     })
 
     test("map to same type", () => {

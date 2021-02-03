@@ -1,19 +1,20 @@
 import {Directory, Header, WadType} from "./WadModel";
 import * as R from "ramda";
-import {util} from "../util";
+import U from "../util";
 import {Log} from "../Log";
 import {Either} from "../Either";
 
-const parseAllDirectories = (header: Header, bytes: number[]): Directory[] =>
-    R.unfold(idx => idx > header.numlumps ? false : [header.infotableofs + idx * 16, idx + 1], 0)
-        .map((ofs, index) => parseDirectory(ofs, index, bytes))
+// TODO verify im known DIRS exists for Either
+const parseAllDirectories = (header: Header, bytes: number[]): Either<Directory[]> =>
+    Either.ofRight(R.unfold(idx => idx > header.numlumps ? false : [header.infotableofs + idx * 16, idx + 1], 0)
+        .map((ofs, index) => parseDirectory(ofs, index, bytes)))
 
 const parseDirectory = (offset: number, idx: number, bytes: number[]): Directory => {
-    const parseIntBytes = util.parseInt(bytes)
+    const intParser = U.parseInt(bytes)
     const dir = {
-        filepos: parseIntBytes(offset),
-        size: parseIntBytes(offset + 0x04),
-        name: util.parseStr(bytes)(offset + 0x08, 8),
+        filepos: intParser(offset),
+        size: intParser(offset + 0x04),
+        name: U.parseStr(bytes)(offset + 0x08, 8),
         idx
     };
     Log.trace("Parsed Directory %1 on %2 -> %3", idx, offset, dir);
@@ -24,13 +25,13 @@ const findDirectoryByName = (dirs: Directory[]) => (name: string): Either<Direct
     Either.ofNullable(dirs.find(d => d.name === name), () => "Directory: " + name + " not found")
 
 const parseHeader = (bytes: number[]): Either<Header> => {
-    const headerStr = util.parseStrOp(bytes)(s => s === "IWAD", (s) => "WAD type not supported: " + s)(0x00, 4)
-    const parseIntBytes = util.parseInt(bytes);
+    const headerStr = U.parseStrOp(bytes)(s => s === "IWAD", (s) => "WAD type not supported: " + s)(0x00, 4)
+    const intParser = U.parseInt(bytes);
     return Either.ofTruth([headerStr], () =>
         ({
             identification: headerStr.map(s => WadType[s]).get(),
-            numlumps: parseIntBytes(0x04),
-            infotableofs: parseIntBytes(0x08)
+            numlumps: intParser(0x04),
+            infotableofs: intParser(0x08)
         })).exec(h => Log.debug("Parsed Header: %1", h))
 }
 

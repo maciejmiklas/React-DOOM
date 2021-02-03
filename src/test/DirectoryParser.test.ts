@@ -42,7 +42,7 @@ const findDirectory = (dir: Directory, dirs: Directory[]) =>
 
 describe("Parse All Directories", () => {
     const header = HEADER.get();
-    const allDirs = dp.parseAllDirectories(header, WAD_BYTES);
+    const allDirs = dp.parseAllDirectories(header, WAD_BYTES).get();
     const validate = (dir: Directory) => {
         const found = findDirectory(dir, allDirs)
         eqDir(dir, found)
