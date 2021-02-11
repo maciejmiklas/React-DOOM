@@ -102,8 +102,7 @@ const NavButton = ({children, onClick, className = "", tooltipOn = "top", toolti
             <Tooltip id={`tooltip-${tooltipOn}`}>
                 {tooltipText}
             </Tooltip>
-        }
-    >
+        }>
         <Button onClick={onClick} variant="outline-secondary"
                 className={`${className} navbarButton`} hidden={!enabled}>{children}
         </Button>

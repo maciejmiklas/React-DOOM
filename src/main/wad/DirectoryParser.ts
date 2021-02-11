@@ -4,10 +4,12 @@ import U from "../util";
 import {Log} from "../Log";
 import {Either} from "../Either";
 
-// TODO verify im known DIRS exists for Either
-const parseAllDirectories = (header: Header, bytes: number[]): Either<Directory[]> =>
-    Either.ofRight(R.unfold(idx => idx > header.numlumps ? false : [header.infotableofs + idx * 16, idx + 1], 0)
-        .map((ofs, index) => parseDirectory(ofs, index, bytes)))
+const parseAllDirectories = (header: Header, bytes: number[]): Either<Directory[]> => {
+    const dirs = R.unfold(idx => idx > header.numlumps ? false : [header.infotableofs + idx * 16, idx + 1], 0)
+        .map((ofs, index) => parseDirectory(ofs, index, bytes))
+    Log.debug("Parsed %1 directories", dirs.length)
+    return Either.ofCondition(() => findDirectoryByName(dirs)("TITLEPIC").isRight(), () => "TITLEPIC not found in Dirs", () => dirs)
+}
 
 const parseDirectory = (offset: number, idx: number, bytes: number[]): Directory => {
     const intParser = U.parseInt(bytes)

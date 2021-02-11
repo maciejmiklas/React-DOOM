@@ -1,15 +1,12 @@
 $screen-gb-color: black;
 $nav-bg-color: rgb(40, 44, 52);
 
-$dialog-bg-color: rgb(40, 44, 52);
-$dialog-bg-tr-color: rgba(40, 44, 52, 0.9);
-
 $font-color: rgb(76, 255, 0);
 
 $error-color: rgb(249, 255, 0);
 
 $dialog-bg-color: rgba(102, 0, 0, 0.8);
-$dialog-bg-tr-color: rgba(102, 0, 0, 0.6);
+$dialog-bg-tr-color: rgba(102, 0, 0, 0.8);
 $dialog-bg-hover-bg-color: rgba(102, 0, 0, 0.8);
 $dialog-bg-hover-color: $font-color;
 $dialog-border-color:rgba(252, 0, 0, 0.8);
@@ -23,3 +20,5 @@ $flicker-delay: 0.5s;
 $input-active-bg: #cbcbcb;
 $input-inactive-bg: #91adca;
 $input-font-color:black;
+
+$input-button-bg: $input-active-bg;

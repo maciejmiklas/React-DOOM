@@ -107,3 +107,10 @@
   background-color: $dialog-bg-tr-color;
   color: $font-color;
 }
+
+.input-button {
+  @extend .btn;
+  @extend .btn-light;
+  background-color: $input-button-bg;
+}
+

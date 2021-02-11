@@ -10,6 +10,7 @@ import Actions from "../store/Actions";
 import {MessageList} from "./Messages";
 import {actionNavigationBack} from "./Navigation";
 import {ManageStorage} from "./ManageStorage";
+import {WadViewer} from "./WadViewer";
 
 // ################### ACTIONS ###################
 export const actionGotoPrevious = () => ({
@@ -67,12 +68,25 @@ export const reducer = (state = [], action) => {
 }
 // ################### REDUCER ###################
 
+class RouterComponent extends Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        const {pageName, pageProps} = this.props;
+        const TagName = components[pageName]
+        return (<TagName {...pageProps}/>)
+    }
+}
+
 export const PAGES = {
     PLAY_PAGE: "PLAY_PAGE",
     WAD_MANAGE: "WAD_MANAGE",
     WAD_UPLOAD: "WAD_UPLOAD",
     STORAGE: "STORAGE",
     WAD_EDIT: "WAD_EDIT",
+    WAD_VIEW: "WAD_VIEW",
     MENU: "MENU",
     MESSAGES: "MESSAGES",
 };
@@ -89,19 +103,8 @@ const components = {
     WAD_EDIT: EditWad,
     MENU: Menu,
     MESSAGES: MessageList,
-    STORAGE: ManageStorage
-}
-
-class RouterComponent extends Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        const {pageName, pageProps} = this.props;
-        const TagName = components[pageName]
-        return (<TagName {...pageProps}/>)
-    }
+    STORAGE: ManageStorage,
+    WAD_VIEW: WadViewer
 }
 
 const configureBack = (action, previous) => {

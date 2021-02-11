@@ -13,6 +13,9 @@ module.exports = {
         publicPath: '/React-DOOM/dist'
     },
     devtool: 'inline-source-map',
+    resolve: {
+        extensions: ['.ts', '.tsx', '.js', '.json']
+    },
     module: {
         rules: [
             {

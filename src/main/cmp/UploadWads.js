@@ -6,6 +6,8 @@ import {connect} from "react-redux";
 import {actionShowOverwrite, ConfirmStore} from "./ConfirmStore";
 import Actions from "../store/Actions";
 import * as R from "ramda"
+import U from "../util";
+import {actionGotoPage, PAGES} from "./Router";
 
 // ################### ACTIONS ###################
 const actionWadOverwrite = (fileName, content) => [
@@ -101,9 +103,9 @@ const uploadFile = (wads, uploadNew, uploadExisting) => file => {
 
 const normalizeWadName = (fileName) => fileName.split('.')[0];
 
-const createWad = (fileName, content) => ({
+const createWad = (fileName, bytes) => ({
     name: normalizeWadName(fileName),
-    content: "TODO: WadParser.parse(content)",
+    content: U.uint8ArrayToBase64(new Uint8Array(bytes)),
     uploadTime: new Date(),
     lastPlayed: 0,
     saves: [],
@@ -118,6 +120,7 @@ const stateToProps = state => ({wads: [...state.wads.files]});
 const dispatchToProps = dispatch => ({
     uploadNew: (fileName, content) => {
         dispatch(actionWadUpload(fileName, content))
+        dispatch(actionGotoPage(PAGES.WAD_VIEW, {wadName:normalizeWadName(fileName)}))
     },
     uploadExisting: (fileName, content) => {
         dispatch(actionShowOverwrite(fileName)(actionWadOverwrite(fileName, content),

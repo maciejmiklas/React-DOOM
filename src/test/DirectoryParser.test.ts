@@ -1,4 +1,4 @@
-import {Directory, MapLumpType} from "../main/wad/WadModel";
+import {Directory, MapLumpType, WadType} from "../main/wad/WadModel";
 import {functions as dp} from "../main/wad/DirectoryParser";
 import {
     ALL_DIRS,
@@ -77,5 +77,15 @@ describe("Find Map Directory", () => {
 
     test("Second MAP", () => {
         validate(FIRST_MAP_DIR_OFFSET + MapLumpType.BLOCKMAP + 1, FD_E1M2)
+    });
+})
+
+describe("Parse Header", () => {
+
+    test("Header found", () => {
+        expect(HEADER.isRight()).toBeTruthy()
+    });
+    test("numlumps", () => {
+        expect(HEADER.get().numlumps).toEqual(1241)
     });
 })

@@ -20,7 +20,7 @@ const parseWad = (bytes: number[]): Either<Wad> => {
     const res = dp.parseHeader(bytes)
         .map(header => ({header}))
         .append(w => dp.parseAllDirectories(w.header, bytes), (t, v) => t.dirs = v)
-        .append(w => parseTitlePic(bytes, w["dirs"]), (t, v) => t.title = v)
+        .append(w => parseTitlePic(bytes, w.dirs), (t, v) => t.title = v)
     return res;
 }
 

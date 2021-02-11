@@ -1,7 +1,7 @@
 export const initial = {
     router: {
         active: {
-            pageName: "MENU",
+            pageName: "WAD_UPLOAD",
             pageProps: {}
         },
         previous: {

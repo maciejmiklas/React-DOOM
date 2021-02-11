@@ -253,6 +253,7 @@ export type Column = {
 export type PatchBitmap = {
     header: PatchHeader
     columns: Column[]
+    imageData: Uint8ClampedArray
 }
 
 /**
